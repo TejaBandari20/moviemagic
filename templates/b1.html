@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Tickets - MovieMagic</title>
+    <style>
+        body { background-color: #111; color: white; font-family: sans-serif; padding: 20px; display: flex; justify-content: center; }
+        .container { display: flex; gap: 40px; width: 100%; max-width: 900px; }
+        .left, .right { background-color: #222; padding: 20px; border-radius: 8px; flex: 1; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; background: #333; border: none; color: white; border-radius: 4px; }
+        .seats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px 0; }
+        .seat { background: #444; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; }
+        .seat.selected { background-color: #e50914; }
+        .btn { width: 100%; padding: 15px; background-color: #e50914; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 16px; border-radius: 4px; }
+    </style>
+    <script>
+        function selectSeat(el) {
+            el.classList.toggle('selected');
+            updateSummary();
+        }
+        function updateSummary() {
+            const seats = document.querySelectorAll('.seat.selected');
+            const seatNumbers = Array.from(seats).map(s => s.innerText).join(', ');
+            document.getElementById('selected_seats').value = seatNumbers;
+            
+            const price = Number("{{ price }}");
+            const total = seats.length * price;
+            document.getElementById('amount_display').innerText = '₹' + total;
+            document.getElementById('amount_input').value = total;
+        }
+    </script>
+</head>
+<body>
+    <form action="/tickets" method="POST" class="container">
+        <input type="hidden" name="movie" value="{{ movie }}">
+        <input type="hidden" name="theater" value="{{ theater }}">
+        <input type="hidden" name="address" value="{{ address }}">
+        <input type="hidden" name="seats" id="selected_seats" required>
+        <input type="hidden" name="amount" id="amount_input">
+
+        <div class="left">
+            <h2>{{ movie }}</h2>
+            <p>{{ theater }}<br>{{ address }}</p>
+            <h3>Select Date & Time</h3>
+            <input type="date" name="date" required>
+            <select name="time" required>
+                <option>10:00 AM</option>
+                <option>01:00 PM</option>
+                <option>04:00 PM</option>
+                <option>07:00 PM</option>
+            </select>
+            
+            <h3>Select Seats (₹{{ price }}/seat)</h3>
+            <div class="seats">
+                <div class="seat" onclick="selectSeat(this)">A1</div>
+                <div class="seat" onclick="selectSeat(this)">A2</div>
+                <div class="seat" onclick="selectSeat(this)">A3</div>
+                <div class="seat" onclick="selectSeat(this)">B1</div>
+                <div class="seat" onclick="selectSeat(this)">B2</div>
+                <div class="seat" onclick="selectSeat(this)">B3</div>
+            </div>
+        </div>
+
+        <div class="right">
+            <h2>Booking Summary</h2>
+            <p><strong>Total Amount:</strong> <span id="amount_display">₹0</span></p>
+            <button type="submit" class="btn">CONFIRM BOOKING</button>
+        </div>
+    </form>
+</body>
+</html>

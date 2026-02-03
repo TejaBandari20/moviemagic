@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ticket Confirmed</title>
+    <style>
+        body { background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+        .ticket { background-color: #1a1a1a; width: 600px; border-radius: 10px; overflow: hidden; color: white; }
+        .header { background-color: #28a745; padding: 20px; text-align: center; font-weight: bold; }
+        .content { padding: 30px; display: flex; justify-content: space-between; }
+        .row { margin-bottom: 15px; }
+        .label { color: #888; font-size: 12px; }
+        .value { font-size: 18px; font-weight: bold; }
+        .btn { display: block; text-align: center; background: #e50914; color: white; padding: 15px; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <div class="header">Booking Confirmed! Check your Email.</div>
+        <div class="content">
+            <div>
+                <div class="row"><div class="label">MOVIE</div><div class="value">{{ booking.movie_name }}</div></div>
+                <div class="row"><div class="label">DATE</div><div class="value">{{ booking.date }}</div></div>
+                <div class="row"><div class="label">THEATER</div><div class="value">{{ booking.theater }}</div></div>
+            </div>
+            <div>
+                <div class="row"><div class="label">BOOKING ID</div><div class="value">{{ booking.booking_id }}</div></div>
+                <div class="row"><div class="label">SEATS</div><div class="value">{{ booking.seats }}</div></div>
+                <div class="row"><div class="label">AMOUNT PAID</div><div class="value">₹{{ booking.amount_paid }}</div></div>
+            </div>
+        </div>
+        <a href="/home1" class="btn">Back to Home</a>
+    </div>
+</body>
+</html>
