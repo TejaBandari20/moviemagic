@@ -15,7 +15,7 @@ app.secret_key = 'your_static_secret_key_here'
 AWS_REGION = os.environ.get('AWS_REGION', 'ap-south-1')
 
 # SNS Topic ARN
-SNS_TOPIC_ARN = 'arn:aws:sns:ap-south-1:605134430972:MovieTicketNotifications'
+SNS_TOPIC_ARN = 'arn:aws:sns:ap-south-1:977099000730:MovieTicketNotifications'
 
 # AWS services
 dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
