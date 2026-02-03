@@ -2,16 +2,7 @@
 <html>
 <head>
     <title>Book Tickets - MovieMagic</title>
-    <style>
-        body { background-color: #111; color: white; font-family: sans-serif; padding: 20px; display: flex; justify-content: center; }
-        .container { display: flex; gap: 40px; width: 100%; max-width: 900px; }
-        .left, .right { background-color: #222; padding: 20px; border-radius: 8px; flex: 1; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; background: #333; border: none; color: white; border-radius: 4px; }
-        .seats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px 0; }
-        .seat { background: #444; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; }
-        .seat.selected { background-color: #e50914; }
-        .btn { width: 100%; padding: 15px; background-color: #e50914; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 16px; border-radius: 4px; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script>
         function selectSeat(el) {
             el.classList.toggle('selected');

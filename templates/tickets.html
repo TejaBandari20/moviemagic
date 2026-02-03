@@ -2,16 +2,7 @@
 <html>
 <head>
     <title>Ticket Confirmed</title>
-    <style>
-        body { background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
-        .ticket { background-color: #1a1a1a; width: 600px; border-radius: 10px; overflow: hidden; color: white; }
-        .header { background-color: #28a745; padding: 20px; text-align: center; font-weight: bold; }
-        .content { padding: 30px; display: flex; justify-content: space-between; }
-        .row { margin-bottom: 15px; }
-        .label { color: #888; font-size: 12px; }
-        .value { font-size: 18px; font-weight: bold; }
-        .btn { display: block; text-align: center; background: #e50914; color: white; padding: 15px; text-decoration: none; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="ticket">
