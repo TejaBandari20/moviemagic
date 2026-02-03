@@ -1,44 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Dashboard - MovieMagic</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="header">
-        <h1>MovieMagic</h1>
+
+    <div class="navbar">
+        <div class="logo">MOVIEMAGIC</div>
         <div>
-            <span>Welcome, {{ session['user']['name'] }}</span>
-            <a href="/logout" class="logout" style="margin-left: 15px;">Logout</a>
+            <span style="margin-right: 15px; color: #ccc;">Welcome, {{ session['user']['name'] }}</span>
+            <a href="/logout" class="logout-link">Logout</a>
         </div>
     </div>
 
-    <h2 style="margin-top: 30px;">Top Trending Movies</h2>
-    <div class="movies">
-        <div class="card">
-            <img src="/static/images/mad.jpg" alt="MAD">
-            <div class="card-info">
-                <h3>MAD</h3>
-                <p>Comedy, Drama</p>
-                <a href="/b1?movie=MAD&theater=PVR Cinemas&address=Hi-Tech City&price=200" class="btn">Book Now</a>
+    <div class="container">
+        <h2 class="section-title">Now Showing</h2>
+
+        <div class="movies-grid">
+            <div class="movie-card">
+                <img src="/static/images/mad.jpg" alt="MAD">
+                <div class="card-details">
+                    <div class="movie-title">MAD</div>
+                    <div class="movie-genre">Comedy, Drama</div>
+                    <a href="/b1?movie=MAD&theater=PVR Cinemas&address=Hi-Tech City&price=200" class="btn btn-block">Book Now</a>
+                </div>
             </div>
-        </div>
-        <div class="card">
-            <img src="/static/images/court.jpg" alt="Court">
-            <div class="card-info">
-                <h3>Court</h3>
-                <p>Drama, Thriller</p>
-                <a href="/b1?movie=Court&theater=AMB Cinemas&address=Gachibowli&price=250" class="btn">Book Now</a>
+
+            <div class="movie-card">
+                <img src="/static/images/court.jpg" alt="Court">
+                <div class="card-details">
+                    <div class="movie-title">Court</div>
+                    <div class="movie-genre">Drama, Thriller</div>
+                    <a href="/b1?movie=Court&theater=AMB Cinemas&address=Gachibowli&price=250" class="btn btn-block">Book Now</a>
+                </div>
             </div>
-        </div>
-        <div class="card">
-            <img src="/static/images/rrr.jpg" alt="RRR">
-            <div class="card-info">
-                <h3>RRR</h3>
-                <p>Action, History</p>
-                <a href="/b1?movie=RRR&theater=Prasads IMAX&address=Necklace Road&price=300" class="btn">Book Now</a>
+
+            <div class="movie-card">
+                <img src="/static/images/rrr.jpg" alt="RRR">
+                <div class="card-details">
+                    <div class="movie-title">RRR</div>
+                    <div class="movie-genre">Action, History</div>
+                    <a href="/b1?movie=RRR&theater=Prasads IMAX&address=Necklace Road&price=300" class="btn btn-block">Book Now</a>
+                </div>
             </div>
         </div>
     </div>
+
 </body>
 </html>

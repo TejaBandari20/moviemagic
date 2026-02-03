@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Book Tickets - MovieMagic</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script>
@@ -8,19 +9,28 @@
             el.classList.toggle('selected');
             updateSummary();
         }
+
         function updateSummary() {
             const seats = document.querySelectorAll('.seat.selected');
             const seatNumbers = Array.from(seats).map(s => s.innerText).join(', ');
             document.getElementById('selected_seats').value = seatNumbers;
-            
+
+            // Fix for the JS error: We treat the price as a string, then convert
             const price = Number("{{ price }}");
             const total = seats.length * price;
+            
             document.getElementById('amount_display').innerText = '₹' + total;
             document.getElementById('amount_input').value = total;
         }
     </script>
 </head>
 <body>
+
+    <div class="navbar">
+        <div class="logo">MOVIEMAGIC</div>
+        <a href="/home1" class="logout-link">Back to Movies</a>
+    </div>
+
     <form action="/tickets" method="POST" class="container">
         <input type="hidden" name="movie" value="{{ movie }}">
         <input type="hidden" name="theater" value="{{ theater }}">
@@ -28,34 +38,47 @@
         <input type="hidden" name="seats" id="selected_seats" required>
         <input type="hidden" name="amount" id="amount_input">
 
-        <div class="left">
-            <h2>{{ movie }}</h2>
-            <p>{{ theater }}<br>{{ address }}</p>
-            <h3>Select Date & Time</h3>
-            <input type="date" name="date" required>
-            <select name="time" required>
-                <option>10:00 AM</option>
-                <option>01:00 PM</option>
-                <option>04:00 PM</option>
-                <option>07:00 PM</option>
-            </select>
-            
-            <h3>Select Seats (₹{{ price }}/seat)</h3>
-            <div class="seats">
-                <div class="seat" onclick="selectSeat(this)">A1</div>
-                <div class="seat" onclick="selectSeat(this)">A2</div>
-                <div class="seat" onclick="selectSeat(this)">A3</div>
-                <div class="seat" onclick="selectSeat(this)">B1</div>
-                <div class="seat" onclick="selectSeat(this)">B2</div>
-                <div class="seat" onclick="selectSeat(this)">B3</div>
+        <h2 class="section-title">Book Tickets: {{ movie }}</h2>
+
+        <div class="booking-layout">
+            <div class="booking-panel">
+                <h3>Select Time</h3>
+                <select name="time" class="form-input" required>
+                    <option>10:00 AM</option>
+                    <option>01:00 PM</option>
+                    <option>04:00 PM</option>
+                    <option>07:00 PM</option>
+                </select>
+                <input type="date" name="date" class="form-input" required>
+
+                <h3>Select Seats (₹{{ price }})</h3>
+                <div class="seat-grid">
+                    <div class="seat" onclick="selectSeat(this)">A1</div>
+                    <div class="seat" onclick="selectSeat(this)">A2</div>
+                    <div class="seat" onclick="selectSeat(this)">A3</div>
+                    <div class="seat" onclick="selectSeat(this)">A4</div>
+                    <div class="seat" onclick="selectSeat(this)">B1</div>
+                    <div class="seat" onclick="selectSeat(this)">B2</div>
+                    <div class="seat" onclick="selectSeat(this)">B3</div>
+                    <div class="seat" onclick="selectSeat(this)">B4</div>
+                    <div class="seat" onclick="selectSeat(this)">C1</div>
+                    <div class="seat" onclick="selectSeat(this)">C2</div>
+                </div>
+            </div>
+
+            <div class="booking-panel">
+                <h3>Summary</h3>
+                <p style="color: #aaa;">Theater: {{ theater }}</p>
+                <p style="color: #aaa;">Address: {{ address }}</p>
+                <hr style="border-color: #333; margin: 20px 0;">
+                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold;">
+                    <span>Total:</span>
+                    <span id="amount_display" style="color: #e50914;">₹0</span>
+                </div>
+                <button type="submit" class="btn btn-block" style="margin-top: 30px;">CONFIRM & PAY</button>
             </div>
         </div>
-
-        <div class="right">
-            <h2>Booking Summary</h2>
-            <p><strong>Total Amount:</strong> <span id="amount_display">₹0</span></p>
-            <button type="submit" class="btn">CONFIRM BOOKING</button>
-        </div>
     </form>
+
 </body>
 </html>
