@@ -8,16 +8,16 @@ from botocore.exceptions import ClientError
 
 app = Flask(__name__)
 
-# Use a static secret key
+# Use a static secret key (Replace with a random string for production security)
 app.secret_key = 'your_static_secret_key_here'
 
 # AWS Configuration
 AWS_REGION = os.environ.get('AWS_REGION', 'ap-south-1')
 
-# SNS Topic ARN
+# SNS Topic ARN (Updated with your correct Account ID)
 SNS_TOPIC_ARN = 'arn:aws:sns:ap-south-1:977099000730:MovieTicketNotifications'
 
-# AWS services
+# Initialize AWS services
 dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
 sns = boto3.client('sns', region_name=AWS_REGION)
 
@@ -28,8 +28,37 @@ BOOKINGS_TABLE_NAME = os.environ.get('BOOKINGS_TABLE_NAME', 'MovieMagic_Bookings
 users_table = dynamodb.Table(USERS_TABLE_NAME)
 bookings_table = dynamodb.Table(BOOKINGS_TABLE_NAME)
 
+# ===================== DATA =====================
 
-# ===================== SNS EMAIL =====================
+# Dynamic Movie List (Add new movies here!)
+MOVIES_DATA = [
+    {
+        'title': 'MAD',
+        'genre': 'Comedy, Drama',
+        'image': 'mad.jpg',
+        'price': 200,
+        'theater': 'PVR Cinemas',
+        'address': 'Hi-Tech City'
+    },
+    {
+        'title': 'Court',
+        'genre': 'Drama, Thriller',
+        'image': 'court.jpg',
+        'price': 250,
+        'theater': 'AMB Cinemas',
+        'address': 'Gachibowli'
+    },
+    {
+        'title': 'RRR',
+        'genre': 'Action, History',
+        'image': 'rrr.jpg',
+        'price': 300,
+        'theater': 'Prasads IMAX',
+        'address': 'Necklace Road'
+    }
+]
+
+# ===================== SNS EMAIL FUNCTION =====================
 
 def send_booking_confirmation(booking):
     if not SNS_TOPIC_ARN:
@@ -59,7 +88,6 @@ Please show this confirmation at the theater to collect your tickets.
 
 Thank you for choosing MovieMagic!
 """
-
         user_email = booking['booked_by']
 
         sns.publish(
@@ -73,7 +101,6 @@ Thank you for choosing MovieMagic!
                 }
             }
         )
-
         return True
 
     except Exception as e:
@@ -81,7 +108,7 @@ Thank you for choosing MovieMagic!
         return False
 
 
-# ===================== AUTH =====================
+# ===================== AUTH ROUTES =====================
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -91,11 +118,13 @@ def signup():
         password = generate_password_hash(request.form['password'])
 
         try:
+            # Check if user exists
             response = users_table.get_item(Key={'email': email})
             if 'Item' in response:
                 flash('Email already registered!', 'danger')
                 return redirect(url_for('signup'))
 
+            # Create new user
             users_table.put_item(
                 Item={
                     'id': str(uuid.uuid4()),
@@ -151,7 +180,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-# ===================== PAGES =====================
+# ===================== PAGE ROUTES =====================
 
 @app.route('/')
 def index():
@@ -162,7 +191,9 @@ def index():
 def home1():
     if 'user' not in session:
         return redirect(url_for('login'))
-    return render_template('home1.html')
+    
+    # Pass the dynamic movie list to the template
+    return render_template('home1.html', movies=MOVIES_DATA)
 
 
 @app.route('/about')
@@ -175,7 +206,7 @@ def contact():
     return render_template('contact_us.html')
 
 
-# ===================== BOOKING =====================
+# ===================== BOOKING ROUTES =====================
 
 @app.route('/b1', methods=['GET'], endpoint='b1')
 def booking_page():
@@ -197,6 +228,7 @@ def tickets():
         return redirect(url_for('login'))
 
     try:
+        # Get data from form
         movie_name = request.form.get('movie')
         booking_date = request.form.get('date')
         show_time = request.form.get('time')
@@ -205,6 +237,7 @@ def tickets():
         selected_seats = request.form.get('seats')
         amount_paid = request.form.get('amount')
 
+        # Generate ID
         booking_id = f"MM-{datetime.now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8]}"
 
         booking_item = {
@@ -221,7 +254,10 @@ def tickets():
             'created_at': datetime.now().isoformat()
         }
 
+        # Save to DB
         bookings_table.put_item(Item=booking_item)
+        
+        # Send Email
         send_booking_confirmation(booking_item)
 
         flash('Booking successful! Confirmation sent to your email.', 'success')
@@ -238,7 +274,7 @@ def tickets():
         return redirect(url_for('home1'))
 
 
-# ===================== RUN =====================
+# ===================== MAIN RUN =====================
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

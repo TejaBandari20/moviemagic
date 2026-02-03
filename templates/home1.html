@@ -15,36 +15,21 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container fade-in">
         <h2 class="section-title">Now Showing</h2>
 
         <div class="movies-grid">
+            {% for movie in movies %}
             <div class="movie-card">
-                <img src="/static/images/mad.jpg" alt="MAD">
+                <img src="{{ url_for('static', filename='images/' + movie.image) }}" alt="{{ movie.title }}">
                 <div class="card-details">
-                    <div class="movie-title">MAD</div>
-                    <div class="movie-genre">Comedy, Drama</div>
-                    <a href="/b1?movie=MAD&theater=PVR Cinemas&address=Hi-Tech City&price=200" class="btn btn-block">Book Now</a>
+                    <div class="movie-title">{{ movie.title }}</div>
+                    <div class="movie-genre">{{ movie.genre }}</div>
+                    <a href="{{ url_for('b1', movie=movie.title, theater=movie.theater, address=movie.address, price=movie.price) }}" 
+                       class="btn btn-block">Book Now</a>
                 </div>
             </div>
-
-            <div class="movie-card">
-                <img src="/static/images/court.jpg" alt="Court">
-                <div class="card-details">
-                    <div class="movie-title">Court</div>
-                    <div class="movie-genre">Drama, Thriller</div>
-                    <a href="/b1?movie=Court&theater=AMB Cinemas&address=Gachibowli&price=250" class="btn btn-block">Book Now</a>
-                </div>
-            </div>
-
-            <div class="movie-card">
-                <img src="/static/images/rrr.jpg" alt="RRR">
-                <div class="card-details">
-                    <div class="movie-title">RRR</div>
-                    <div class="movie-genre">Action, History</div>
-                    <a href="/b1?movie=RRR&theater=Prasads IMAX&address=Necklace Road&price=300" class="btn btn-block">Book Now</a>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 
