@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import boto3
+from boto3.dynamodb.conditions import Attr # IMPORTED FOR FILTERING
 import uuid
 import os
 from botocore.exceptions import ClientError
@@ -80,7 +81,7 @@ def login():
                 user = response['Item']
                 if check_password_hash(user['password'], password):
                     session['user'] = {'name': user['name'], 'email': user['email']}
-                    return redirect(url_for('dashboard')) # NEW ROUTE NAME
+                    return redirect(url_for('dashboard'))
             
             flash('Invalid credentials', 'danger')
         except ClientError:
@@ -93,23 +94,21 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
-# --- NEW RENAMED ROUTES ---
-
-@app.route('/dashboard') # Was /home1
+@app.route('/dashboard')
 def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
-    return render_template('dashboard.html', movies=MOVIES_DATA) # Was home1.html
+    return render_template('dashboard.html', movies=MOVIES_DATA)
 
-@app.route('/booking') # Was /b1
+@app.route('/booking')
 def booking():
     if 'user' not in session: return redirect(url_for('login'))
-    return render_template('booking.html', # Was b1.html
+    return render_template('booking.html',
                            movie=request.args.get('movie'),
                            theater=request.args.get('theater'),
                            address=request.args.get('address'),
                            price=request.args.get('price'))
 
-@app.route('/confirm_booking', methods=['POST']) # Was /tickets
+@app.route('/confirm_booking', methods=['POST'])
 def confirm_booking():
     if 'user' not in session: return redirect(url_for('login'))
     
@@ -133,12 +132,31 @@ def confirm_booking():
         bookings_table.put_item(Item=booking_item)
         send_email(booking_item)
         
-        return render_template('confirmation.html', booking=booking_item) # Was tickets.html
+        return render_template('confirmation.html', booking=booking_item)
 
     except Exception as e:
         print(e)
         flash('Booking failed', 'danger')
         return redirect(url_for('dashboard'))
+
+# --- NEW ROUTE: USER PROFILE ---
+@app.route('/profile')
+def profile():
+    if 'user' not in session: return redirect(url_for('login'))
+    
+    user_email = session['user']['email']
+    user_bookings = []
+
+    try:
+        # Scan table for bookings where 'booked_by' matches current user
+        response = bookings_table.scan(
+            FilterExpression=Attr('booked_by').eq(user_email)
+        )
+        user_bookings = response.get('Items', [])
+    except ClientError as e:
+        print(f"DB Error: {e}")
+    
+    return render_template('profile.html', user=session['user'], bookings=user_bookings)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

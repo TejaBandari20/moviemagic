@@ -1,5 +1,3 @@
-/* static/css/style.css */
-
 :root {
     --primary: #e50914; /* Netflix Red */
     --dark-bg: #0b0c15; /* Deep Cinematic Blue/Black */
@@ -127,11 +125,11 @@ ul { list-style: none; }
     text-transform: uppercase;
     margin-bottom: 20px;
     background: -webkit-linear-gradient(#fff, #aaa);
-    background: linear-gradient(#fff, #aaa); /* Standard syntax */
+    background: linear-gradient(#fff, #aaa);
     -webkit-background-clip: text;
-    background-clip: text; /* Standard property added here */
+    background-clip: text;
     -webkit-text-fill-color: transparent;
-    color: transparent; /* Standard fallback */
+    color: transparent;
 }
 
 /* --- 4. DASHBOARD GRID --- */
@@ -256,3 +254,72 @@ ul { list-style: none; }
 /* Animations */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes printTicket { from { transform: translateY(-50px) rotateX(-90deg); opacity: 0; } to { transform: translateY(0) rotateX(0); opacity: 1; } }
+
+/* --- 7. PROFILE PAGE (NEW) --- */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 15px;
+    margin-bottom: 50px;
+    border: 1px solid var(--glass-border);
+}
+
+.avatar-circle {
+    width: 80px;
+    height: 80px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.history-card {
+    background: rgba(255,255,255,0.05);
+    padding: 25px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.3s;
+    border-left: 4px solid transparent;
+}
+
+.history-card:hover {
+    background: rgba(255,255,255,0.1);
+    border-left: 4px solid var(--primary);
+    transform: translateX(10px);
+}
+
+.history-right {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.tag {
+    background: rgba(0,0,0,0.3);
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    color: #ccc;
+    border: 1px solid #333;
+}
+
+.tag.price {
+    color: var(--primary);
+    font-weight: bold;
+    border-color: var(--primary);
+}

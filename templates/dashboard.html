@@ -10,8 +10,13 @@
     <nav class="navbar">
         <div class="logo">MOVIEMAGIC</div>
         <div class="user-menu">
-            <span>Hi, {{ session['user']['name'] }}</span>
-            <a href="/logout" class="btn-outline">Logout</a>
+            <a href="{{ url_for('profile') }}" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <div style="width: 35px; height: 35px; background: #e50914; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold;">
+                    {{ session['user']['name'][0] }}
+                </div>
+                <span style="color: #ccc;">Hi, {{ session['user']['name'] }}</span>
+            </a>
+            <a href="/logout" class="btn-outline" style="margin-left: 15px;">Logout</a>
         </div>
     </nav>
 

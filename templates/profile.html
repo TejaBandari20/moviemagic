@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="[https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap](https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap)" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">MOVIEMAGIC</div>
+        <a href="/dashboard" class="btn-outline">Dashboard</a>
+    </nav>
+
+    <div class="container">
+        <!-- User Info Card -->
+        <div class="profile-header">
+            <div class="avatar-circle">{{ user['name'][0] }}</div>
+            <div>
+                <h2 style="margin-bottom: 5px;">{{ user['name'] }}</h2>
+                <p style="color: #aaa;">{{ user['email'] }}</p>
+            </div>
+        </div>
+
+        <h3 class="section-title">Booking History</h3>
+
+        <!-- Booking List -->
+        <div class="history-list">
+            {% if bookings %}
+                {% for booking in bookings %}
+                <div class="history-card">
+                    <div class="history-left">
+                        <h4 style="color: var(--primary); margin-bottom: 5px; font-size: 1.2rem;">{{ booking.movie_name }}</h4>
+                        <p style="font-size: 0.9rem; color: #ccc;">{{ booking.theater }}</p>
+                        <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">ID: {{ booking.booking_id }}</p>
+                    </div>
+                    <div class="history-right">
+                        <div class="tag">{{ booking.date }}</div>
+                        <div class="tag">{{ booking.time }}</div>
+                        <div class="tag price">₹{{ booking.amount_paid }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; color: #555; margin-top: 50px;">
+                    <p>No bookings found.</p>
+                    <a href="/dashboard" class="btn-primary" style="margin-top: 20px; display: inline-block;">Book a Movie</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
