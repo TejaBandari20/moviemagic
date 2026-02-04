@@ -108,8 +108,7 @@ ul { list-style: none; }
     box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4);
 }
 
-/* --- 3. LANDING PAGE FIX (NEW) --- */
-/* Added explicit Hero styles to fix static look */
+/* --- 3. LANDING PAGE FIX (HERO) --- */
 .hero {
     height: 100vh;
     display: flex;
@@ -117,11 +116,10 @@ ul { list-style: none; }
     justify-content: center;
     align-items: center;
     text-align: center;
-    /* Gradient fallback + Image */
     background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('../images/background.jpg');
     background-size: cover;
     background-position: center;
-    background-color: #111; /* Fallback color */
+    background-color: #111;
 }
 
 .hero h1 {
@@ -129,12 +127,14 @@ ul { list-style: none; }
     text-transform: uppercase;
     margin-bottom: 20px;
     background: -webkit-linear-gradient(#fff, #aaa);
+    background: linear-gradient(#fff, #aaa); /* Standard syntax */
     -webkit-background-clip: text;
+    background-clip: text; /* Standard property added here */
     -webkit-text-fill-color: transparent;
+    color: transparent; /* Standard fallback */
 }
 
-
-/* --- 4. DASHBOARD GRID FIX (NEW) --- */
+/* --- 4. DASHBOARD GRID --- */
 .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
 
 .section-title {
@@ -147,7 +147,6 @@ ul { list-style: none; }
     content: ''; position: absolute; left: 0; top: 5px; height: 80%; width: 5px; background: var(--primary); border-radius: 2px;
 }
 
-/* CHANGED: From grid to flex to prevent giant cards */
 .movie-grid {
     display: flex;
     flex-wrap: wrap;
@@ -157,7 +156,7 @@ ul { list-style: none; }
 
 .movie-card {
     background: var(--card-bg);
-    width: 250px; /* FIXED WIDTH */
+    width: 250px;
     border-radius: 15px;
     overflow: hidden;
     transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -173,7 +172,7 @@ ul { list-style: none; }
 .movie-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; }
 .movie-genre { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 15px; }
 
-/* --- 5. BOOKING PAGE (THEATER) --- */
+/* --- 5. BOOKING PAGE --- */
 .booking-layout { display: flex; gap: 40px; margin-top: 20px; }
 .theater-side { flex: 2; }
 .summary-side { flex: 1; }
@@ -192,7 +191,6 @@ ul { list-style: none; }
     letter-spacing: 5px;
 }
 
-/* --- SEAT NUMBERS FIX (NEW) --- */
 .seats-grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
@@ -205,12 +203,10 @@ ul { list-style: none; }
 .seat {
     height: 35px;
     background: #2a3b55;
-    border-radius: 8px; /* Slightly rounded */
+    border-radius: 8px;
     cursor: pointer;
     transition: 0.2s;
     position: relative;
-    
-    /* ADDED: Flexbox to center the text "A1" inside the seat */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -236,7 +232,7 @@ ul { list-style: none; }
     justify-content: center;
     align-items: center;
     min-height: 80vh;
-    flex-direction: column; /* Added column for button placement */
+    flex-direction: column;
 }
 
 .ticket {
@@ -248,7 +244,7 @@ ul { list-style: none; }
     overflow: hidden;
     box-shadow: 0 0 50px rgba(229, 9, 20, 0.3);
     animation: printTicket 1s ease-out;
-    margin-bottom: 30px; /* Space for download button */
+    margin-bottom: 30px;
 }
 
 .ticket-visual { flex: 1; background: url('../images/background.jpg') center/cover; position: relative; }
