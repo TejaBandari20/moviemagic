@@ -1,14 +1,12 @@
 /* static/css/style.css */
 
 :root {
-    --primary: #e50914; /* Netflix Red */
-    --dark-bg: #0b0c15; /* Deep Cinematic Blue/Black */
+    --primary: #e50914;
+    --dark-bg: #0b0c15;
     --card-bg: #151f30;
     --text-white: #ffffff;
-    --text-gray: #a3a3a3;
     --glass: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
@@ -22,202 +20,92 @@ body {
 }
 
 a { text-decoration: none; color: inherit; transition: 0.3s; }
-ul { list-style: none; }
 
-/* --- 1. GLASSMORPHISM NAVBAR --- */
-.navbar {
+/* --- LANDING PAGE FIX --- */
+.hero {
+    height: 100vh;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 5%;
-    background: rgba(11, 12, 21, 0.8);
-    backdrop-filter: blur(10px);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid var(--glass-border);
-}
-
-.logo {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.user-menu { display: flex; align-items: center; gap: 20px; font-size: 0.9rem; }
-
-.btn-outline {
-    border: 1px solid rgba(255,255,255,0.3);
-    padding: 8px 20px;
-    border-radius: 50px;
-}
-.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
-
-/* --- 2. AUTH PAGES (Login/Signup) --- */
-.auth-container {
-    height: 90vh;
-    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: radial-gradient(circle at center, #1a2236 0%, #0b0c15 100%);
-}
-
-.glass-card {
-    background: var(--glass);
-    backdrop-filter: blur(15px);
-    border: 1px solid var(--glass-border);
-    padding: 50px;
-    border-radius: 20px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: var(--shadow);
     text-align: center;
-    animation: fadeUp 0.8s ease;
+    /* Gradient fallback in case image is missing */
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('../images/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-color: #111; /* Fallback color */
 }
 
-.form-group input {
-    width: 100%;
-    padding: 15px;
-    margin: 10px 0;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid transparent;
-    border-radius: 8px;
-    color: white;
-    outline: none;
-}
-.form-group input:focus { border-color: var(--primary); }
-
-.btn-primary {
-    background: var(--primary);
-    color: white;
-    padding: 15px;
-    width: 100%;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: transform 0.2s, box-shadow 0.2s;
+.hero h1 {
+    font-size: 4rem;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    background: -webkit-linear-gradient(#fff, #aaa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.btn-primary:hover {
-    background: #f40612;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4);
-}
-
-/* --- 3. DASHBOARD GRID --- */
+/* --- DASHBOARD FIX (Grid) --- */
 .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
 
-.section-title {
-    font-size: 2rem;
-    margin-bottom: 30px;
-    position: relative;
-    padding-left: 20px;
-}
-.section-title::before {
-    content: ''; position: absolute; left: 0; top: 5px; height: 80%; width: 5px; background: var(--primary); border-radius: 2px;
-}
+.section-title { font-size: 2rem; margin-bottom: 30px; border-left: 5px solid var(--primary); padding-left: 15px; }
 
 .movie-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    display: flex; /* Changed from Grid to Flex for better control */
+    flex-wrap: wrap;
     gap: 30px;
+    justify-content: center; /* Centers items if there are only a few */
 }
 
 .movie-card {
     background: var(--card-bg);
+    width: 250px; /* Fixed width to prevent "Huge Card" issue */
     border-radius: 15px;
     overflow: hidden;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: 0.3s;
     position: relative;
-    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
 }
 
-.movie-card:hover { transform: translateY(-10px) scale(1.02); z-index: 10; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+.movie-card:hover { transform: translateY(-10px); z-index: 10; }
+.movie-poster { width: 100%; height: 350px; object-fit: cover; }
+.movie-info { padding: 15px; }
+.movie-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 5px; }
+.movie-genre { color: #aaa; font-size: 0.8rem; margin-bottom: 15px; }
 
-.movie-poster { width: 100%; height: 380px; object-fit: cover; }
-
-.movie-info { padding: 20px; }
-.movie-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; }
-.movie-genre { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 15px; }
-
-/* --- 4. BOOKING PAGE (THEATER) --- */
-.booking-layout { display: flex; gap: 40px; margin-top: 20px; }
-.theater-side { flex: 2; }
-.summary-side { flex: 1; }
-
-.screen {
-    height: 60px;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
-    transform: perspective(1000px) rotateX(-10deg) scale(0.9);
-    box-shadow: 0 20px 50px rgba(255,255,255,0.1);
-    margin-bottom: 50px;
-    border-radius: 50% 50% 0 0 / 20px 20px 0 0;
-    text-align: center;
-    padding-top: 20px;
-    color: rgba(255,255,255,0.3);
-    font-size: 0.8rem;
-    letter-spacing: 5px;
-}
-
+/* --- SEATS FIX (Numbers) --- */
 .seats-grid {
     display: grid;
-    grid-template-columns: repeat(8, 1fr); /* 8 seats per row */
-    gap: 12px;
-    justify-content: center;
-    max-width: 500px;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    max-width: 400px;
     margin: 0 auto;
 }
 
 .seat {
     height: 35px;
     background: #2a3b55;
-    border-radius: 8px 8px 4px 4px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: 0.2s;
-    position: relative;
-}
-.seat:hover:not(.occupied) { background: #4a6fa5; transform: scale(1.2); }
-.seat.selected { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
-.seat.occupied { background: #1a1a1a; cursor: not-allowed; }
-
-.booking-card {
-    background: var(--card-bg);
-    padding: 30px;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
-    position: sticky;
-    top: 100px;
-}
-
-/* --- 5. TICKET STUB --- */
-.ticket-container {
-    display: flex;
+    font-size: 0.7rem; /* Make text small enough to fit */
+    display: flex;     /* Center the text */
     justify-content: center;
     align-items: center;
-    min-height: 80vh;
+    color: rgba(255,255,255,0.5);
 }
 
-.ticket {
-    display: flex;
-    background: white;
-    color: black;
-    width: 700px;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 0 50px rgba(229, 9, 20, 0.3);
-    animation: printTicket 1s ease-out;
-}
+.seat:hover:not(.occupied) { background: #4a6fa5; color: white; }
+.seat.selected { background: var(--primary); color: white; box-shadow: 0 0 10px var(--primary); }
 
-.ticket-visual { flex: 1; background: url('../images/background.jpg') center/cover; position: relative; }
-.ticket-visual::after { content: ''; position: absolute; inset: 0; background: rgba(229,9,20,0.8); }
+/* --- UTILS --- */
+.navbar { display: flex; justify-content: space-between; padding: 20px 5%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
+.logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+.btn-primary { background: var(--primary); color: white; padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; }
+.btn-primary:hover { background: #b20710; }
+.btn-outline { border: 1px solid white; padding: 8px 20px; border-radius: 50px; }
 
-.ticket-details { flex: 2; padding: 40px; position: relative; border-left: 2px dashed #ccc; }
-.ticket-details h1 { font-size: 2rem; color: var(--primary); text-transform: uppercase; margin-bottom: 10px; }
-
-/* Animations */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes printTicket { from { transform: translateY(-50px) rotateX(-90deg); opacity: 0; } to { transform: translateY(0) rotateX(0); opacity: 1; } }
+/* --- TICKET --- */
+.ticket-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; }
+.ticket { display: flex; background: white; color: black; width: 600px; border-radius: 15px; overflow: hidden; margin-bottom: 30px; }
+.ticket-visual { width: 200px; background: #333 url('../images/background.jpg') center/cover; }
+.ticket-details { flex: 1; padding: 30px; }
