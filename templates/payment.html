@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout - MovieMagic</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Processing Overlay Style */
+        .processing-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            color: white;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid #e50914;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="auth-overlay">
+        <div class="glass-card" style="max-width: 500px; text-align: left; position: relative;">
+            <h2 style="color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">Checkout</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <p style="color: #aaa; font-size: 0.9rem;">MOVIE</p>
+                <h3 style="margin-bottom: 15px;">{{ booking_details['movie'] }}</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">
+                    <div><span style="color: #aaa;">Theater:</span><br>{{ booking_details['theater'] }}</div>
+                    <div><span style="color: #aaa;">Seats:</span><br>{{ booking_details['seats'] }}</div>
+                    <div><span style="color: #aaa;">Date:</span><br>{{ booking_details['date'] }}</div>
+                    <div><span style="color: #aaa;">Time:</span><br>{{ booking_details['time'] }}</div>
+                </div>
+            </div>
+
+            <!-- Fake Payment Options -->
+            <div style="margin-bottom: 20px;">
+                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;">SELECT PAYMENT METHOD</p>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1; padding: 10px; border: 1px solid var(--primary); border-radius: 5px; text-align: center; cursor: pointer; background: rgba(229,9,20,0.1);">UPI</div>
+                    <div style="flex: 1; padding: 10px; border: 1px solid #333; border-radius: 5px; text-align: center; cursor: pointer;">Card</div>
+                    <div style="flex: 1; padding: 10px; border: 1px solid #333; border-radius: 5px; text-align: center; cursor: pointer;">NetBanking</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <span>Total Amount Payable</span>
+                <span style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">₹{{ booking_details['amount'] }}</span>
+            </div>
+
+            <button onclick="processPayment()" class="btn-primary" style="width: 100%; font-size: 1.1rem;">PAY NOW</button>
+            <a href="/dashboard" style="display: block; text-align: center; margin-top: 15px; color: #aaa; font-size: 0.8rem;">Cancel Transaction</a>
+        </div>
+    </div>
+
+    <!-- Processing Overlay -->
+    <div class="processing-overlay" id="overlay">
+        <div class="spinner"></div>
+        <h3>Processing Payment...</h3>
+        <p style="color: #aaa; font-size: 0.9rem;">Please do not refresh the page.</p>
+    </div>
+
+    <!-- Hidden Form to submit Data -->
+    <form action="/confirm_booking" method="POST" id="bookingForm" style="display: none;">
+        <input type="hidden" name="movie" value="{{ booking_details['movie'] }}">
+        <input type="hidden" name="theater" value="{{ booking_details['theater'] }}">
+        <input type="hidden" name="address" value="{{ booking_details['address'] }}">
+        <input type="hidden" name="date" value="{{ booking_details['date'] }}">
+        <input type="hidden" name="time" value="{{ booking_details['time'] }}">
+        <input type="hidden" name="seats" value="{{ booking_details['seats'] }}">
+        <input type="hidden" name="amount" value="{{ booking_details['amount'] }}">
+    </form>
+
+    <script>
+        function processPayment() {
+            // 1. Show Overlay
+            document.getElementById('overlay').style.display = 'flex';
+            
+            // 2. Wait 3 seconds then submit
+            setTimeout(() => {
+                document.getElementById('bookingForm').submit();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

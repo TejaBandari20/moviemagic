@@ -25,7 +25,7 @@ movies_table = dynamodb.Table('MovieMagic_Movies')
 def send_email(booking):
     if not SNS_TOPIC_ARN: return False
     try:
-        msg = f"Hello {booking['user_name']},\n\nYour booking for {booking['movie_name']} is confirmed!\nBooking ID: {booking['booking_id']}\nSeats: {booking['seats']}\n\nEnjoy the show!"
+        msg = f"Hello {booking['user_name']},\n\nYour booking for {booking['movie_name']} is confirmed!\nBooking ID: {booking['booking_id']}\nSeats: {booking['seats']}\nAmount Paid: Rs. {booking['amount_paid']}\n\nEnjoy the show!"
         sns.publish(
             TopicArn=SNS_TOPIC_ARN,
             Subject="MovieMagic Ticket Confirmed",
@@ -37,7 +37,7 @@ def send_email(booking):
         print(f"SNS Error: {e}")
         return False
 
-# --- ROUTES ---
+# --- AUTH ROUTES ---
 
 @app.route('/')
 def index():
@@ -49,18 +49,15 @@ def signup():
         email = request.form['email']
         password = generate_password_hash(request.form['password'])
         name = request.form['name']
-        
         try:
             if 'Item' in users_table.get_item(Key={'email': email}):
                 flash('Email already registered', 'danger')
                 return redirect(url_for('signup'))
-            
             users_table.put_item(Item={'id': str(uuid.uuid4()), 'name': name, 'email': email, 'password': password})
             flash('Account created! Please login.', 'success')
             return redirect(url_for('login'))
         except ClientError:
             flash('Error creating account', 'danger')
-
     return render_template('signup.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -69,7 +66,7 @@ def login():
         email = request.form['email']
         password = request.form['password']
         
-        # Admin Check
+        # Admin Login Check
         if email == "admin@moviemagic.com" and password == "admin123":
             session['user'] = {'name': 'Administrator', 'email': email, 'is_admin': True}
             return redirect(url_for('admin_dashboard'))
@@ -81,11 +78,9 @@ def login():
                 if check_password_hash(user['password'], password):
                     session['user'] = {'name': user['name'], 'email': user['email']}
                     return redirect(url_for('dashboard'))
-            
             flash('Invalid credentials', 'danger')
         except ClientError:
             flash('Login error', 'danger')
-
     return render_template('login.html')
 
 @app.route('/logout')
@@ -93,34 +88,34 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
+# --- DASHBOARD & MOVIES ---
+
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
-    
     movies = []
     try:
         response = movies_table.scan()
         movies = response.get('Items', [])
     except ClientError as e:
         print(f"Error fetching movies: {e}")
-
     return render_template('dashboard.html', movies=movies)
 
-# --- NEW MOVIE DETAILS ROUTE ---
 @app.route('/movie/<movie_id>')
 def movie_details(movie_id):
     if 'user' not in session: return redirect(url_for('login'))
-    
     try:
         response = movies_table.get_item(Key={'movie_id': movie_id})
         movie = response.get('Item')
-        if not movie:
+        if not movie: 
             flash('Movie not found', 'danger')
             return redirect(url_for('dashboard'))
         return render_template('movie_details.html', movie=movie)
     except ClientError:
         flash('Error loading movie', 'danger')
         return redirect(url_for('dashboard'))
+
+# --- BOOKING & PAYMENT ---
 
 @app.route('/booking')
 def booking():
@@ -131,14 +126,24 @@ def booking():
                            address=request.args.get('address'),
                            price=request.args.get('price'))
 
+@app.route('/payment', methods=['POST'])
+def payment():
+    if 'user' not in session: return redirect(url_for('login'))
+    # Pass data to the simulated payment page
+    return render_template('payment.html', booking_details=request.form)
+
 @app.route('/confirm_booking', methods=['POST'])
 def confirm_booking():
     if 'user' not in session: return redirect(url_for('login'))
     
+    data = request.form
+    
     try:
-        data = request.form
         booking_id = f"MM-{datetime.now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8]}"
         
+        # Generate a fake payment ID for simulation
+        fake_payment_id = f"PAY-{str(uuid.uuid4())[:12].upper()}"
+
         booking_item = {
             'booking_id': booking_id,
             'movie_name': data.get('movie'),
@@ -149,7 +154,9 @@ def confirm_booking():
             'amount_paid': data.get('amount'),
             'address': data.get('address'),
             'booked_by': session['user']['email'],
-            'user_name': session['user']['name']
+            'user_name': session['user']['name'],
+            'payment_id': fake_payment_id,
+            'booking_time': datetime.now().isoformat()
         }
         
         bookings_table.put_item(Item=booking_item)
@@ -159,8 +166,10 @@ def confirm_booking():
 
     except Exception as e:
         print(e)
-        flash('Booking failed', 'danger')
+        flash('Booking failed.', 'danger')
         return redirect(url_for('dashboard'))
+
+# --- USER PROFILE (With Extra Fields) ---
 
 @app.route('/profile')
 def profile():
@@ -171,12 +180,14 @@ def profile():
     user_info = {}
 
     try:
+        # Fetch latest user details (Mobile, Gender, etc.)
         user_response = users_table.get_item(Key={'email': user_email})
         if 'Item' in user_response:
             user_info = user_response['Item']
         else:
             user_info = session['user']
 
+        # Fetch booking history
         response = bookings_table.scan(FilterExpression=Attr('booked_by').eq(user_email))
         user_bookings = response.get('Items', [])
     except ClientError as e:
@@ -189,24 +200,34 @@ def update_profile():
     if 'user' not in session: return redirect(url_for('login'))
 
     email = session['user']['email']
-    # Collecting all fields
+    
+    # Safe data retrieval using .get(key, '') to avoid NoneType errors
     fields = {
-        'name': f"{request.form.get('first_name')} {request.form.get('last_name')}".strip(),
-        'first_name': request.form.get('first_name'),
-        'last_name': request.form.get('last_name'),
-        'mobile': request.form.get('mobile'),
-        'birthday': request.form.get('birthday'),
-        'gender': request.form.get('gender'),
-        'married': request.form.get('married')
+        'first_name': request.form.get('first_name', ''),
+        'last_name': request.form.get('last_name', ''),
+        'mobile': request.form.get('mobile', ''),
+        'birthday': request.form.get('birthday', ''),
+        'gender': request.form.get('gender', ''),
+        'married': request.form.get('married', '')
     }
+    
+    # Create display name
+    fields['name'] = f"{fields['first_name']} {fields['last_name']}".strip()
+    if not fields['name']:
+        fields['name'] = session['user']['name'] # Fallback if empty
 
     try:
-        # Dynamic Update Expression
+        # Dynamic Update
         update_expr = "set #n=:n, first_name=:fn, last_name=:ln, mobile=:m, birthday=:b, gender=:g, married=:ma"
         expr_names = {'#n': 'name'}
         expr_values = {
-            ':n': fields['name'], ':fn': fields['first_name'], ':ln': fields['last_name'],
-            ':m': fields['mobile'], ':b': fields['birthday'], ':g': fields['gender'], ':ma': fields['married']
+            ':n': fields['name'], 
+            ':fn': fields['first_name'], 
+            ':ln': fields['last_name'],
+            ':m': fields['mobile'], 
+            ':b': fields['birthday'], 
+            ':g': fields['gender'], 
+            ':ma': fields['married']
         }
 
         users_table.update_item(
@@ -215,16 +236,20 @@ def update_profile():
             ExpressionAttributeNames=expr_names,
             ExpressionAttributeValues=expr_values
         )
+        
+        # Update Session
         session['user']['name'] = fields['name']
         session.modified = True
-        flash('Profile updated!', 'success')
+        
+        flash('Profile updated successfully!', 'success')
     except ClientError as e:
         print(e)
         flash('Error updating profile', 'danger')
 
     return redirect(url_for('profile'))
 
-# --- ADMIN ROUTES ---
+# --- ADMIN PORTAL ---
+
 @app.route('/admin')
 def admin_dashboard():
     if 'user' not in session or not session.get('user', {}).get('is_admin'):
@@ -244,7 +269,6 @@ def add_movie():
         return redirect(url_for('login'))
 
     try:
-        # UPDATED: Capturing all new fields
         movie_item = {
             'movie_id': str(uuid.uuid4()),
             'title': request.form['title'],
