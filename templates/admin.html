@@ -136,21 +136,21 @@
                         <label>Genre</label>
                         <input type="hidden" name="genre" id="final_genre" required>
                         <div class="custom-dropdown" id="genre_dropdown">
-                            <div class="dropdown-trigger" onclick="toggleDropdown()">
-                                <span id="selected_text">Select Genres...</span>
+                            <div class="dropdown-trigger" onclick="toggleDropdown('genre')">
+                                <span id="genre_selected_text">Select Genres...</span>
                                 <span class="arrow">▼</span>
                             </div>
                             <div class="dropdown-options">
-                                <div class="option-item" onclick="toggleOption(this, 'Action')">Action</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Adventure')">Adventure</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Animation')">Animation</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Comedy')">Comedy</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Crime')">Crime</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Drama')">Drama</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Fantasy')">Fantasy</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Horror')">Horror</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Sci-Fi')">Sci-Fi</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Thriller')">Thriller</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Action', 'genre')">Action</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Adventure', 'genre')">Adventure</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Animation', 'genre')">Animation</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Comedy', 'genre')">Comedy</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Crime', 'genre')">Crime</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Drama', 'genre')">Drama</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Fantasy', 'genre')">Fantasy</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Horror', 'genre')">Horror</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Sci-Fi', 'genre')">Sci-Fi</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Thriller', 'genre')">Thriller</div>
                             </div>
                         </div>
                     </div>
@@ -158,8 +158,32 @@
                     <!-- Row 2: Details -->
                     <div class="form-group">
                         <label>Language</label>
-                        <input type="text" name="language" required placeholder="e.g. English, Telugu, Hindi">
+                        <input type="hidden" name="language" id="final_language" required>
+                        <div class="custom-dropdown" id="language_dropdown">
+                            <div class="dropdown-trigger" onclick="toggleDropdown('language')">
+                                <span id="language_selected_text">Select Languages...</span>
+                                <span class="arrow">▼</span>
+                            </div>
+                            <div class="dropdown-options">
+                                <div class="option-item" onclick="toggleOption(this, 'English', 'language')">English</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Hindi', 'language')">Hindi</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Telugu', 'language')">Telugu</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Tamil', 'language')">Tamil</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Malayalam', 'language')">Malayalam</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Kannada', 'language')">Kannada</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Bengali', 'language')">Bengali</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Marathi', 'language')">Marathi</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Punjabi', 'language')">Punjabi</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Gujarati', 'language')">Gujarati</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Urdu', 'language')">Urdu</div>
+                                <div class="option-item" onclick="toggleOption(this, 'French', 'language')">French</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Spanish', 'language')">Spanish</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Korean', 'language')">Korean</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Japanese', 'language')">Japanese</div>
+                            </div>
+                        </div>
                     </div>
+
                     <div class="form-group">
                         <label>Duration</label>
                         <input type="text" name="duration" required placeholder="e.g. 2h 30m">
@@ -228,62 +252,85 @@
 
     <!-- Script to handle dynamic multi-select -->
     <script>
-        let selectedGenres = [];
+        const selectionState = {
+            genre: [],
+            language: []
+        };
 
-        function toggleDropdown() {
-            const dropdown = document.querySelector('.dropdown-options');
-            const trigger = document.querySelector('.dropdown-trigger');
+        function toggleDropdown(type) {
+            const dropdown = document.querySelector(`#${type}_dropdown .dropdown-options`);
+            const trigger = document.querySelector(`#${type}_dropdown .dropdown-trigger`);
             
+            // Close other open dropdowns first
+            document.querySelectorAll('.dropdown-options').forEach(el => {
+                if(el !== dropdown) el.classList.remove('open');
+            });
+            document.querySelectorAll('.dropdown-trigger').forEach(el => {
+                if(el !== trigger) el.classList.remove('active');
+            });
+
             dropdown.classList.toggle('open');
             trigger.classList.toggle('active');
         }
 
-        function toggleOption(element, value) {
+        function toggleOption(element, value, type) {
             element.classList.toggle('selected');
             
-            if (selectedGenres.includes(value)) {
+            if (selectionState[type].includes(value)) {
                 // Remove if already selected
-                selectedGenres = selectedGenres.filter(g => g !== value);
+                selectionState[type] = selectionState[type].filter(item => item !== value);
             } else {
                 // Add if not selected
-                selectedGenres.push(value);
+                selectionState[type].push(value);
             }
             
-            updateDisplay();
+            updateDisplay(type);
         }
 
-        function updateDisplay() {
-            const display = document.getElementById('selected_text');
-            const hiddenInput = document.getElementById('final_genre');
+        function updateDisplay(type) {
+            const display = document.getElementById(`${type}_selected_text`);
+            const hiddenInput = document.getElementById(`final_${type}`);
             
-            if (selectedGenres.length > 0) {
-                display.innerText = selectedGenres.join(', ');
+            if (selectionState[type].length > 0) {
+                display.innerText = selectionState[type].join(', ');
                 display.style.color = 'white';
             } else {
-                display.innerText = 'Select Genres...';
+                display.innerText = type === 'genre' ? 'Select Genres...' : 'Select Languages...';
                 display.style.color = '#aaa';
             }
             
-            hiddenInput.value = selectedGenres.join(', ');
+            hiddenInput.value = selectionState[type].join(', ');
         }
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
-            const dropdown = document.getElementById('genre_dropdown');
-            if (!dropdown.contains(e.target)) {
-                document.querySelector('.dropdown-options').classList.remove('open');
-                document.querySelector('.dropdown-trigger').classList.remove('active');
+            if (!e.target.closest('.custom-dropdown')) {
+                document.querySelectorAll('.dropdown-options').forEach(el => el.classList.remove('open'));
+                document.querySelectorAll('.dropdown-trigger').forEach(el => el.classList.remove('active'));
             }
         });
         
-        // Prevent form submission if no genre selected
+        // Prevent form submission if no selection
         document.getElementById('movieForm').addEventListener('submit', function(e) {
-            if (selectedGenres.length === 0) {
-                e.preventDefault();
+            let isValid = true;
+            
+            if (selectionState['genre'].length === 0) {
                 alert('Please select at least one genre.');
-                const trigger = document.querySelector('.dropdown-trigger');
-                trigger.style.borderColor = '#e50914';
-                setTimeout(() => trigger.style.borderColor = 'rgba(255,255,255,0.1)', 2000);
+                document.querySelector('#genre_dropdown .dropdown-trigger').style.borderColor = '#e50914';
+                isValid = false;
+            }
+            
+            if (selectionState['language'].length === 0) {
+                alert('Please select at least one language.');
+                document.querySelector('#language_dropdown .dropdown-trigger').style.borderColor = '#e50914';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                setTimeout(() => {
+                    document.querySelectorAll('.dropdown-trigger').forEach(el => el.style.borderColor = 'rgba(255,255,255,0.1)');
+                }, 2000);
             }
         });
     </script>

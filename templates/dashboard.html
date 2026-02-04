@@ -24,7 +24,9 @@
         <h2 class="section-title">Now Showing</h2>
         <div class="movie-grid">
             {% for movie in movies %}
-            <div class="movie-card" onclick="window.location.href='{{ url_for('movie_details', movie_id=movie.movie_id) }}'">
+            <!-- FIX: Changed div to 'a' tag. Removes 'onclick' error and improves navigation. -->
+            <a href="{{ url_for('movie_details', movie_id=movie.movie_id) }}" class="movie-card" style="text-decoration: none; color: inherit; display: block;">
+                
                 <!-- SMART IMAGE LOGIC -->
                 {% if movie.image.startswith('http') %}
                     <img src="{{ movie.image }}" alt="{{ movie.title }}" class="movie-poster">
@@ -37,12 +39,11 @@
                     <div class="movie-genre">{{ movie.genre }}</div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: var(--primary); font-weight: bold;">{{ movie.language }}</span>
-                        <!-- CHANGED BUTTON: Now links to Details Page -->
-                        <a href="{{ url_for('movie_details', movie_id=movie.movie_id) }}" 
-                           class="btn-outline" style="padding: 8px 15px; width: auto; margin: 0; font-size: 0.8rem;">View Info</a>
+                        <!-- Changed to span since the whole card is now a link -->
+                        <span class="btn-outline" style="padding: 8px 15px; font-size: 0.8rem;">View Info</span>
                     </div>
                 </div>
-            </div>
+            </a>
             {% endfor %}
         </div>
     </div>
