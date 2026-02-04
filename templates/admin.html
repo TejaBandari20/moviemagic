@@ -26,10 +26,35 @@
                         <label>Movie Title</label>
                         <input type="text" name="title" required placeholder="e.g. Inception">
                     </div>
+                    
                     <div class="form-group">
                         <label>Genre</label>
-                        <input type="text" name="genre" required placeholder="e.g. Sci-Fi, Action">
+                        <!-- Hidden input to store comma-separated genres for backend compatibility -->
+                        <input type="hidden" name="genre" id="final_genre">
+                        
+                        <!-- Multi-select menu -->
+                        <select id="genre_select" multiple required style="width: 100%; padding: 15px; margin: 10px 0; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; outline: none; min-height: 140px; font-family: inherit;">
+                            <option value="Action">Action</option>
+                            <option value="Adventure">Adventure</option>
+                            <option value="Animation">Animation</option>
+                            <option value="Comedy">Comedy</option>
+                            <option value="Crime">Crime</option>
+                            <option value="Documentary">Documentary</option>
+                            <option value="Drama">Drama</option>
+                            <option value="Family">Family</option>
+                            <option value="Fantasy">Fantasy</option>
+                            <option value="History">History</option>
+                            <option value="Horror">Horror</option>
+                            <option value="Music">Music</option>
+                            <option value="Mystery">Mystery</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Sci-Fi">Sci-Fi</option>
+                            <option value="Thriller">Thriller</option>
+                            <option value="War">War</option>
+                        </select>
+                        <small style="color: #888; font-size: 0.75rem; display: block; margin-top: -5px;">Hold Ctrl (Windows) or Cmd (Mac) to select multiple</small>
                     </div>
+
                     <div class="form-group">
                         <label>Image URL (or Filename)</label>
                         <!-- Updated Placeholder -->
@@ -73,5 +98,13 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Script to handle multi-select logic -->
+    <script>
+        document.getElementById('genre_select').addEventListener('change', function() {
+            const selected = Array.from(this.selectedOptions).map(option => option.value);
+            document.getElementById('final_genre').value = selected.join(', ');
+        });
+    </script>
 </body>
 </html>
