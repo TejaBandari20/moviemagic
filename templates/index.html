@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <title>MovieMagic</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="hero">
-        <h1>YOUR CINEMA EXPERIENCE</h1>
-        <a href="/login" class="btn">GET STARTED</a>
+        <h1 style="animation: fadeUp 1s ease;">YOUR CINEMA EXPERIENCE</h1>
+        <p style="font-size: 1.2rem; margin-bottom: 30px; color: #ccc;">Blockbusters. Popcorn. Magic.</p>
+        <a href="/login" class="btn-primary" style="font-size: 1.2rem; padding: 15px 40px; border-radius: 50px;">GET STARTED</a>
     </div>
+
+    <style>
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </body>
 </html>

@@ -5,53 +5,46 @@
     <title>Confirmed</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="ticket-container">
-        <div>
-            <h2 style="text-align: center; margin-bottom: 20px; animation: fadeUp 1s ease;">Booking Confirmed!</h2>
-            
-            <div class="ticket">
-                <div class="ticket-visual">
-                    <div style="position: absolute; bottom: 20px; left: 20px; color: white; z-index: 2;">
-                        <div style="font-size: 2rem; font-weight: 800;">{{ booking.movie_name }}</div>
-                        <div>{{ booking.theater }}</div>
-                    </div>
+        <h2 style="margin-bottom: 20px;">Booking Confirmed!</h2>
+        
+        <div class="ticket" id="ticket-capture">
+            <div class="ticket-visual" style="background-color: #e50914;"></div>
+            <div class="ticket-details">
+                <h2 style="color: #e50914; text-transform: uppercase; margin-bottom: 5px;">{{ booking.movie_name }}</h2>
+                <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">{{ booking.theater }}</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem;">
+                    <div><span style="color: #aaa; font-size: 0.7rem;">DATE</span><br><b>{{ booking.date }}</b></div>
+                    <div><span style="color: #aaa; font-size: 0.7rem;">TIME</span><br><b>{{ booking.time }}</b></div>
+                    <div><span style="color: #aaa; font-size: 0.7rem;">SEATS</span><br><b style="color: #e50914;">{{ booking.seats }}</b></div>
+                    <div><span style="color: #aaa; font-size: 0.7rem;">PAID</span><br><b>₹{{ booking.amount_paid }}</b></div>
                 </div>
-
-                <div class="ticket-details">
-                    <div style="color: #888; font-size: 0.9rem; margin-bottom: 30px;">BOOKING ID: #{{ booking.booking_id }}</div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-                        <div>
-                            <div style="font-size: 0.8rem; color: #aaa;">DATE</div>
-                            <div style="font-weight: 600;">{{ booking.date }}</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.8rem; color: #aaa;">TIME</div>
-                            <div style="font-weight: 600;">{{ booking.time }}</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.8rem; color: #aaa;">SEATS</div>
-                            <div style="font-weight: 600; color: var(--primary);">{{ booking.seats }}</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.8rem; color: #aaa;">PAID</div>
-                            <div style="font-weight: 600;">₹{{ booking.amount_paid }}</div>
-                        </div>
-                    </div>
-
-                    <div style="border-top: 2px dashed #ddd; padding-top: 20px; text-align: center;">
-                        <img src="https://bwipjs-api.metafloor.com/?bcid=code128&text={{ booking.booking_id }}&scale=2&height=10" alt="barcode" style="opacity: 0.5;">
-                    </div>
-                </div>
-            </div>
-
-            <div style="text-align: center; margin-top: 40px;">
-                <a href="/dashboard" class="btn-outline">Download Ticket</a>
-                <a href="/dashboard" class="btn-primary" style="display: inline-block; width: auto; margin-left: 20px;">Back to Home</a>
+                
+                <p style="margin-top: 20px; font-size: 0.7rem; color: #ccc;">ID: {{ booking.booking_id }}</p>
             </div>
         </div>
+
+        <div>
+            <button onclick="downloadTicket()" class="btn-outline" style="cursor: pointer;">Download Ticket</button>
+            <a href="/dashboard" class="btn-primary" style="margin-left: 20px;">Home</a>
+        </div>
     </div>
+
+    <script>
+        function downloadTicket() {
+            const ticketElement = document.getElementById("ticket-capture");
+            html2canvas(ticketElement).then(canvas => {
+                // Convert canvas to image and trigger download
+                const link = document.createElement("a");
+                link.download = 'MovieMagic-Ticket.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+    </script>
 </body>
 </html>
