@@ -37,10 +37,17 @@
     <script>
         function downloadTicket() {
             const ticketElement = document.getElementById("ticket-capture");
-            html2canvas(ticketElement).then(canvas => {
+            
+            // IMPROVED CONFIGURATION
+            html2canvas(ticketElement, {
+                scale: 2,                // 1. High Resolution (Retina quality)
+                useCORS: true,           // 2. Allow background images to load
+                backgroundColor: "#ffffff", // 3. Force white background (prevents transparency glitch)
+                scrollY: -window.scrollY // 4. Fixes issue if user scrolled down
+            }).then(canvas => {
                 const link = document.createElement("a");
                 link.download = 'MovieMagic-Ticket.png';
-                link.href = canvas.toDataURL();
+                link.href = canvas.toDataURL("image/png");
                 link.click();
             });
         }
