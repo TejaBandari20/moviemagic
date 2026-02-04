@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>Dashboard - MovieMagic</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
 </head>
 <body>
-
     <div class="navbar">
         <div class="logo">MOVIEMAGIC</div>
         <div>
@@ -17,7 +17,6 @@
 
     <div class="container fade-in">
         <h2 class="section-title">Now Showing</h2>
-
         <div class="movies-grid">
             {% for movie in movies %}
             <div class="movie-card">
@@ -25,13 +24,12 @@
                 <div class="card-details">
                     <div class="movie-title">{{ movie.title }}</div>
                     <div class="movie-genre">{{ movie.genre }}</div>
-                    <a href="{{ url_for('b1', movie=movie.title, theater=movie.theater, address=movie.address, price=movie.price) }}" 
+                    <a href="{{ url_for('booking', movie=movie.title, theater=movie.theater, address=movie.address, price=movie.price) }}" 
                        class="btn btn-block">Book Now</a>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
-
 </body>
 </html>

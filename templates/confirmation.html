@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmed</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden;">
+
+    <h2 style="opacity: 0; animation: fadeInUp 1s 0.5s forwards;">Booking Confirmed!</h2>
+    <p style="color: #aaa; margin-bottom: 30px; opacity: 0; animation: fadeInUp 1s 0.8s forwards;">Email sent to {{ booking.booked_by }}</p>
+
+    <div class="ticket-wrapper">
+        <div class="ticket-card">
+            <div class="ticket-left">
+                <h3 style="color: #e50914; text-transform: uppercase;">{{ booking.movie_name }}</h3>
+                <p style="font-weight: bold;">{{ booking.theater }}</p>
+                
+                <div style="display: flex; gap: 30px; margin-top: 20px;">
+                    <div><span class="label">DATE</span><div class="value">{{ booking.date }}</div></div>
+                    <div><span class="label">TIME</span><div class="value">{{ booking.time }}</div></div>
+                    <div><span class="label">SEATS</span><div class="value" style="color: #e50914;">{{ booking.seats }}</div></div>
+                </div>
+            </div>
+            
+            <div class="ticket-right">
+                <div style="font-size: 2rem; font-weight: bold;">₹{{ booking.amount_paid }}</div>
+                <div style="font-size: 0.8rem; opacity: 0.8;">PAID</div>
+            </div>
+        </div>
+    </div>
+
+    <a href="/dashboard" class="btn" style="margin-top: 50px; background: transparent; border: 1px solid white; opacity: 0; animation: fadeInUp 1s 2s forwards;">Back to Dashboard</a>
+</body>
+</html>

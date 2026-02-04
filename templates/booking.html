@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book - {{ movie }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+</head>
+<body>
+    <div class="glass-panel booking-container" data-price="{{ price }}" style="width: 800px; margin-top: 50px;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="border-left: 4px solid #e50914; padding-left: 15px; margin: 0;">{{ movie }}</h2>
+            <a href="/dashboard" class="logout-link">Back</a>
+        </div>
+        <p style="color: #aaa; margin-bottom: 30px;">{{ theater }} | {{ address }}</p>
+
+        <form action="/confirm_booking" method="POST" style="display: flex; gap: 40px;">
+            <input type="hidden" name="movie" value="{{ movie }}">
+            <input type="hidden" name="theater" value="{{ theater }}">
+            <input type="hidden" name="address" value="{{ address }}">
+            <input type="hidden" name="seats" id="seats-input" required>
+            <input type="hidden" name="amount" id="amount-input">
+            <input type="hidden" name="date" value="{{ request.args.get('date', '') }}">
+            <input type="hidden" name="time" value="{{ request.args.get('time', '') }}">
+
+            <div style="flex: 2;">
+                <div style="background: #555; height: 5px; width: 100%; margin-bottom: 30px; border-radius: 50%; box-shadow: 0 0 20px rgba(255,255,255,0.2);"></div>
+                <p style="text-align: center; font-size: 0.8rem; color: #888; margin-bottom: 15px;">SCREEN</p>
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
+                    {% for row in ['A', 'B', 'C'] %}
+                        {% for num in range(1, 7) %}
+                        <div class="seat">{{ row }}{{ num }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div style="flex: 1; border-left: 1px solid #444; padding-left: 30px;">
+                <h3 style="margin-bottom: 15px;">Details</h3>
+                
+                <input type="date" name="date" class="form-input" required>
+                <select name="time" class="form-input" style="background: #222;" required>
+                    <option>10:00 AM</option>
+                    <option>01:00 PM</option>
+                    <option>04:00 PM</option>
+                    <option>07:00 PM</option>
+                </select>
+
+                <div style="margin-top: 30px;">
+                    <p>Total</p>
+                    <h1 id="total-price" style="color: #e50914;">₹0</h1>
+                </div>
+                <button class="btn-pulse" style="width: 100%; font-size: 1rem; margin-top: 20px;">PAY NOW</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
