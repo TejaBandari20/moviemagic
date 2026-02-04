@@ -53,7 +53,7 @@ ul { list-style: none; }
 }
 .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 
-/* --- 2. AUTH PAGES (Login/Signup) --- */
+/* --- 2. AUTH PAGES (Signup - Old Style kept for compatibility) --- */
 .auth-container {
     height: 90vh;
     display: flex;
@@ -255,7 +255,7 @@ ul { list-style: none; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes printTicket { from { transform: translateY(-50px) rotateX(-90deg); opacity: 0; } to { transform: translateY(0) rotateX(0); opacity: 1; } }
 
-/* --- 7. PROFILE PAGE (NEW) --- */
+/* --- 7. PROFILE PAGE --- */
 .profile-header {
     display: flex;
     align-items: center;
@@ -324,7 +324,6 @@ ul { list-style: none; }
     border-color: var(--primary);
 }
 
-/* --- 8. PROFILE EDIT & ACTIONS (LATEST) --- */
 .edit-form-container {
     background: var(--card-bg);
     padding: 30px;
@@ -342,7 +341,7 @@ ul { list-style: none; }
 }
 
 .btn-save {
-    background: #28a745; /* Green for save */
+    background: #28a745;
     color: white;
     padding: 10px 25px;
     border-radius: 5px;
@@ -365,3 +364,121 @@ ul { list-style: none; }
     display: inline-block;
 }
 .btn-danger:hover { background: #b20710; }
+
+/* --- 8. NEW LOGIN MODAL STYLES (BookMyShow Style) --- */
+.auth-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.auth-modal {
+    background: #ffffff; /* White Card */
+    color: #333;
+    width: 90%;
+    max-width: 400px;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    text-align: center;
+    position: relative;
+    font-family: 'Roboto', sans-serif;
+}
+
+.modal-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: #333;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px; right: 20px;
+    font-size: 1.5rem;
+    color: #999;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.social-btn:hover {
+    background-color: #f9f9f9;
+    border-color: #ccc;
+}
+
+.social-btn img { width: 18px; height: 18px; }
+
+.divider {
+    font-size: 0.75rem;
+    color: #999;
+    margin: 20px 0;
+    position: relative;
+}
+.divider::before, .divider::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 42%;
+    height: 1px;
+    background: #e0e0e0;
+}
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+.mobile-input-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 30px;
+}
+
+.mobile-input-container span { margin: 0 10px; font-weight: 500; color: #333; }
+.mobile-field { border: none; outline: none; width: 100%; font-size: 1rem; }
+
+.terms { font-size: 0.7rem; color: #777; }
+.terms a { color: #e50914; text-decoration: none; }
+
+/* Modal specific inputs */
+.modal-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    color: #333;
+}
+.modal-submit {
+    width: 100%;
+    padding: 12px;
+    background: #e50914;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
