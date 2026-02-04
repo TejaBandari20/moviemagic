@@ -147,9 +147,17 @@ def profile():
     
     user_email = session['user']['email']
     user_bookings = []
+    user_info = {}
 
     try:
-        # Scan table for bookings where 'booked_by' matches current user
+        # 1. Fetch latest user details from DB (to get mobile, gender, etc.)
+        user_response = users_table.get_item(Key={'email': user_email})
+        if 'Item' in user_response:
+            user_info = user_response['Item']
+        else:
+            user_info = session['user'] # Fallback
+
+        # 2. Fetch history
         response = bookings_table.scan(
             FilterExpression=Attr('booked_by').eq(user_email)
         )
@@ -157,26 +165,46 @@ def profile():
     except ClientError as e:
         print(f"DB Error: {e}")
     
-    return render_template('profile.html', user=session['user'], bookings=user_bookings)
+    return render_template('profile.html', user=user_info, bookings=user_bookings)
 
 @app.route('/update_profile', methods=['POST'])
 def update_profile():
     if 'user' not in session: return redirect(url_for('login'))
 
-    new_name = request.form.get('name')
     email = session['user']['email']
+    
+    # Get all the new fields
+    first_name = request.form.get('first_name')
+    last_name = request.form.get('last_name')
+    mobile = request.form.get('mobile')
+    birthday = request.form.get('birthday')
+    gender = request.form.get('gender')
+    married = request.form.get('married')
+
+    # Construct display name
+    full_name = f"{first_name} {last_name}".strip()
+    if not full_name: 
+        full_name = session['user']['name']
 
     try:
-        # Update DynamoDB
+        # Update DynamoDB with all fields
         users_table.update_item(
             Key={'email': email},
-            UpdateExpression="set #n = :n",
+            UpdateExpression="set #n=:n, first_name=:fn, last_name=:ln, mobile=:m, birthday=:b, gender=:g, married=:ma",
             ExpressionAttributeNames={'#n': 'name'},
-            ExpressionAttributeValues={':n': new_name}
+            ExpressionAttributeValues={
+                ':n': full_name,
+                ':fn': first_name,
+                ':ln': last_name,
+                ':m': mobile,
+                ':b': birthday,
+                ':g': gender,
+                ':ma': married
+            }
         )
 
         # Update Session
-        session['user']['name'] = new_name
+        session['user']['name'] = full_name
         session.modified = True
 
         flash('Profile updated successfully!', 'success')

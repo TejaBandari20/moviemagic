@@ -15,7 +15,8 @@
     <div class="container">
         <!-- 1. Profile Header & Logout -->
         <div class="profile-header">
-            <div class="avatar-circle">{{ user['name'][0] }}</div>
+            <!-- Display first letter of name as avatar -->
+            <div class="avatar-circle">{{ user['name'][0] | upper }}</div>
             <div>
                 <h2 style="margin-bottom: 5px;">{{ user['name'] }}</h2>
                 <p style="color: #aaa;">{{ user['email'] }}</p>
@@ -27,36 +28,84 @@
         </div>
 
         <!-- 2. Edit Profile Form -->
-        <div class="edit-form-container" style="background: #151f30; padding: 30px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 40px; max-width: 600px;">
-            <h3 style="border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; color: #e50914;">Edit Profile</h3>
+        <div class="edit-form-container">
             <form action="/update_profile" method="POST">
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="color: #aaa; font-size: 0.9rem;">Full Name</label>
-                    <input type="text" name="name" value="{{ user['name'] }}" required style="width: 100%; padding: 10px; background: #0b0c15; border: 1px solid #333; color: white; border-radius: 5px;">
+                
+                <!-- Section 1: Account Details -->
+                <h3 class="section-heading">Account Details</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        <input type="text" name="mobile" value="{{ user.get('mobile', '') }}" placeholder="+91 - ">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <!-- Disabled because email is the primary key -->
+                        <input type="email" value="{{ user['email'] }}" disabled style="cursor: not-allowed; opacity: 0.6;">
+                    </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="color: #aaa; font-size: 0.9rem;">Email (Cannot be changed)</label>
-                    <input type="email" value="{{ user['email'] }}" disabled style="width: 100%; padding: 10px; background: #0b0c15; border: 1px solid #333; color: #777; border-radius: 5px; cursor: not-allowed;">
+
+                <!-- Section 2: Personal Details -->
+                <h3 class="section-heading" style="margin-top: 30px;">Personal Details</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>First Name *</label>
+                        <input type="text" name="first_name" value="{{ user.get('first_name', '') }}" placeholder="Enter first name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name *</label>
+                        <input type="text" name="last_name" value="{{ user.get('last_name', '') }}" placeholder="Enter last name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Birthday (Optional)</label>
+                        <input type="date" name="birthday" value="{{ user.get('birthday', '') }}">
+                    </div>
+
+                    <!-- Radio Buttons for Identity (Gender) -->
+                    <div class="form-group">
+                        <label>Identity (Optional)</label>
+                        <div class="toggle-group">
+                            <input type="radio" name="gender" id="woman" value="Woman" {% if user.get('gender') == 'Woman' %}checked{% endif %}>
+                            <label for="woman" class="toggle-label">Woman</label>
+                            
+                            <input type="radio" name="gender" id="man" value="Man" {% if user.get('gender') == 'Man' %}checked{% endif %}>
+                            <label for="man" class="toggle-label">Man</label>
+                        </div>
+                    </div>
+
+                    <!-- Radio Buttons for Married Status -->
+                    <div class="form-group">
+                        <label>Married? (Optional)</label>
+                        <div class="toggle-group">
+                            <input type="radio" name="married" id="yes" value="Yes" {% if user.get('married') == 'Yes' %}checked{% endif %}>
+                            <label for="yes" class="toggle-label">Yes</label>
+                            
+                            <input type="radio" name="married" id="no" value="No" {% if user.get('married') == 'No' %}checked{% endif %}>
+                            <label for="no" class="toggle-label">No</label>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="btn-primary" style="background-color: #28a745;">Save Changes</button>
+
+                <button type="submit" class="btn-save">Save Changes</button>
             </form>
         </div>
 
-        <!-- 3. Booking History List -->
+        <!-- 3. Booking History -->
         <h3 class="section-title">Booking History</h3>
-        <div class="history-list" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="history-list">
             {% if bookings %}
                 {% for booking in bookings %}
-                <div class="history-card" style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #e50914;">
+                <div class="history-card">
                     <div class="history-left">
                         <h4 style="color: #e50914; margin-bottom: 5px; font-size: 1.2rem;">{{ booking.movie_name }}</h4>
                         <p style="font-size: 0.9rem; color: #ccc;">{{ booking.theater }}</p>
                         <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">ID: {{ booking.booking_id }}</p>
                     </div>
-                    <div class="history-right" style="display: flex; gap: 15px; align-items: center;">
-                        <div class="tag" style="background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 50px; font-size: 0.8rem; color: #ccc; border: 1px solid #333;">{{ booking.date }}</div>
-                        <div class="tag" style="background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 50px; font-size: 0.8rem; color: #ccc; border: 1px solid #333;">{{ booking.time }}</div>
-                        <div class="tag price" style="background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 50px; font-size: 0.8rem; color: #e50914; font-weight: bold; border: 1px solid #e50914;">₹{{ booking.amount_paid }}</div>
+                    <div class="history-right">
+                        <div class="tag">{{ booking.date }}</div>
+                        <div class="tag">{{ booking.time }}</div>
+                        <div class="tag price">₹{{ booking.amount_paid }}</div>
                     </div>
                 </div>
                 {% endfor %}
