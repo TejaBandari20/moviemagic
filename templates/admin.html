@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Admin Portal - MovieMagic</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="[https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap](https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap)" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar" style="background: #1a1a1a;">
@@ -31,8 +31,9 @@
                         <input type="text" name="genre" required placeholder="e.g. Sci-Fi, Action">
                     </div>
                     <div class="form-group">
-                        <label>Image Filename</label>
-                        <input type="text" name="image" required placeholder="e.g. inception.jpg (must exist in static/images)">
+                        <label>Image URL (or Filename)</label>
+                        <!-- Updated Placeholder -->
+                        <input type="text" name="image" required placeholder="Paste image link (https://...) OR filename (mad.jpg)">
                     </div>
                     <div class="form-group">
                         <label>Ticket Price (₹)</label>

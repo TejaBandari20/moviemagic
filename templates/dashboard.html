@@ -4,17 +4,16 @@
     <meta charset="UTF-8">
     <title>Dashboard - MovieMagic</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="[https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap](https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap)" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="navbar">
         <div class="logo">MOVIEMAGIC</div>
         
-        <!-- UPDATED USER MENU (No Logout Button) -->
         <div class="user-menu">
             <a href="{{ url_for('profile') }}" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                 <div style="width: 35px; height: 35px; background: #e50914; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold;">
-                    {{ session['user']['name'][0] }}
+                    {{ session['user']['name'][0] | upper }}
                 </div>
                 <span style="color: #ccc;">Hi, {{ session['user']['name'] }}</span>
             </a>
@@ -26,7 +25,13 @@
         <div class="movie-grid">
             {% for movie in movies %}
             <div class="movie-card">
-                <img src="{{ url_for('static', filename='images/' + movie.image) }}" alt="{{ movie.title }}" class="movie-poster">
+                <!-- SMART IMAGE LOGIC: Handles both local files and web URLs -->
+                {% if movie.image.startswith('http') %}
+                    <img src="{{ movie.image }}" alt="{{ movie.title }}" class="movie-poster">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/' + movie.image) }}" alt="{{ movie.title }}" class="movie-poster">
+                {% endif %}
+                
                 <div class="movie-info">
                     <div class="movie-title">{{ movie.title }}</div>
                     <div class="movie-genre">{{ movie.genre }}</div>
