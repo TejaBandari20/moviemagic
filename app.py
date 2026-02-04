@@ -19,7 +19,7 @@ dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
 sns = boto3.client('sns', region_name=AWS_REGION)
 users_table = dynamodb.Table('MovieMagic_Users')
 bookings_table = dynamodb.Table('MovieMagic_Bookings')
-movies_table = dynamodb.Table('MovieMagic_Movies') # NEW TABLE
+movies_table = dynamodb.Table('MovieMagic_Movies')
 
 # --- HELPER FUNCTIONS ---
 def send_email(booking):
@@ -69,7 +69,7 @@ def login():
         email = request.form['email']
         password = request.form['password']
         
-        # Admin Login Check (Simple hardcoded check for demonstration)
+        # Admin Check
         if email == "admin@moviemagic.com" and password == "admin123":
             session['user'] = {'name': 'Administrator', 'email': email, 'is_admin': True}
             return redirect(url_for('admin_dashboard'))
@@ -93,12 +93,10 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
-# --- DASHBOARD (Now Dynamic) ---
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
     
-    # Fetch movies from DynamoDB instead of static list
     movies = []
     try:
         response = movies_table.scan()
@@ -107,6 +105,22 @@ def dashboard():
         print(f"Error fetching movies: {e}")
 
     return render_template('dashboard.html', movies=movies)
+
+# --- NEW MOVIE DETAILS ROUTE ---
+@app.route('/movie/<movie_id>')
+def movie_details(movie_id):
+    if 'user' not in session: return redirect(url_for('login'))
+    
+    try:
+        response = movies_table.get_item(Key={'movie_id': movie_id})
+        movie = response.get('Item')
+        if not movie:
+            flash('Movie not found', 'danger')
+            return redirect(url_for('dashboard'))
+        return render_template('movie_details.html', movie=movie)
+    except ClientError:
+        flash('Error loading movie', 'danger')
+        return redirect(url_for('dashboard'))
 
 @app.route('/booking')
 def booking():
@@ -148,7 +162,6 @@ def confirm_booking():
         flash('Booking failed', 'danger')
         return redirect(url_for('dashboard'))
 
-# --- USER PROFILE ROUTES ---
 @app.route('/profile')
 def profile():
     if 'user' not in session: return redirect(url_for('login'))
@@ -176,29 +189,42 @@ def update_profile():
     if 'user' not in session: return redirect(url_for('login'))
 
     email = session['user']['email']
-    new_name = request.form.get('name') # This field name depends on your profile.html form
-    # Note: Adapt this to match the specific fields in your profile.html if needed.
-    # The previous conversation had many fields, using 'name' as placeholder here to ensure it runs.
-    # If using the complex profile form, replicate the update logic from previous steps.
-    
-    # Simple update for safety in this step
+    # Collecting all fields
+    fields = {
+        'name': f"{request.form.get('first_name')} {request.form.get('last_name')}".strip(),
+        'first_name': request.form.get('first_name'),
+        'last_name': request.form.get('last_name'),
+        'mobile': request.form.get('mobile'),
+        'birthday': request.form.get('birthday'),
+        'gender': request.form.get('gender'),
+        'married': request.form.get('married')
+    }
+
     try:
+        # Dynamic Update Expression
+        update_expr = "set #n=:n, first_name=:fn, last_name=:ln, mobile=:m, birthday=:b, gender=:g, married=:ma"
+        expr_names = {'#n': 'name'}
+        expr_values = {
+            ':n': fields['name'], ':fn': fields['first_name'], ':ln': fields['last_name'],
+            ':m': fields['mobile'], ':b': fields['birthday'], ':g': fields['gender'], ':ma': fields['married']
+        }
+
         users_table.update_item(
             Key={'email': email},
-            UpdateExpression="set #n = :n",
-            ExpressionAttributeNames={'#n': 'name'},
-            ExpressionAttributeValues={':n': new_name}
+            UpdateExpression=update_expr,
+            ExpressionAttributeNames=expr_names,
+            ExpressionAttributeValues=expr_values
         )
-        session['user']['name'] = new_name
+        session['user']['name'] = fields['name']
         session.modified = True
-        flash('Profile updated successfully!', 'success')
+        flash('Profile updated!', 'success')
     except ClientError as e:
         print(e)
         flash('Error updating profile', 'danger')
 
     return redirect(url_for('profile'))
 
-# --- ADMIN ROUTES (NEW) ---
+# --- ADMIN ROUTES ---
 @app.route('/admin')
 def admin_dashboard():
     if 'user' not in session or not session.get('user', {}).get('is_admin'):
@@ -218,14 +244,20 @@ def add_movie():
         return redirect(url_for('login'))
 
     try:
+        # UPDATED: Capturing all new fields
         movie_item = {
             'movie_id': str(uuid.uuid4()),
             'title': request.form['title'],
             'genre': request.form['genre'],
+            'language': request.form['language'],
+            'duration': request.form['duration'],
+            'image': request.form['image'],
+            'trailer': request.form['trailer'],
             'price': request.form['price'],
+            'rating': request.form['rating'],
             'theater': request.form['theater'],
             'address': request.form['address'],
-            'image': request.form['image'] # Storing filename e.g. "mad.jpg"
+            'description': request.form['description']
         }
         movies_table.put_item(Item=movie_item)
         flash('Movie added successfully!', 'success')

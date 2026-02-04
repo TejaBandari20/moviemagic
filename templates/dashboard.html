@@ -24,8 +24,8 @@
         <h2 class="section-title">Now Showing</h2>
         <div class="movie-grid">
             {% for movie in movies %}
-            <div class="movie-card">
-                <!-- SMART IMAGE LOGIC: Handles both local files and web URLs -->
+            <div class="movie-card" onclick="window.location.href='{{ url_for('movie_details', movie_id=movie.movie_id) }}'">
+                <!-- SMART IMAGE LOGIC -->
                 {% if movie.image.startswith('http') %}
                     <img src="{{ movie.image }}" alt="{{ movie.title }}" class="movie-poster">
                 {% else %}
@@ -36,9 +36,10 @@
                     <div class="movie-title">{{ movie.title }}</div>
                     <div class="movie-genre">{{ movie.genre }}</div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: var(--primary); font-weight: bold;">₹{{ movie.price }}</span>
-                        <a href="{{ url_for('booking', movie=movie.title, theater=movie.theater, address=movie.address, price=movie.price) }}" 
-                           class="btn-primary" style="padding: 8px 15px; width: auto; margin: 0;">Book</a>
+                        <span style="color: var(--primary); font-weight: bold;">{{ movie.language }}</span>
+                        <!-- CHANGED BUTTON: Now links to Details Page -->
+                        <a href="{{ url_for('movie_details', movie_id=movie.movie_id) }}" 
+                           class="btn-outline" style="padding: 8px 15px; width: auto; margin: 0; font-size: 0.8rem;">View Info</a>
                     </div>
                 </div>
             </div>
