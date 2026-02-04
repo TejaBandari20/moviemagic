@@ -2,30 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - MovieMagic</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="navbar">
+    <nav class="navbar">
         <div class="logo">MOVIEMAGIC</div>
-        <div>
-            <span style="margin-right: 15px; color: #ccc;">Welcome, {{ session['user']['name'] }}</span>
-            <a href="/logout" class="logout-link">Logout</a>
+        <div class="user-menu">
+            <span>Hi, {{ session['user']['name'] }}</span>
+            <a href="/logout" class="btn-outline">Logout</a>
         </div>
-    </div>
+    </nav>
 
-    <div class="container fade-in">
+    <div class="container">
         <h2 class="section-title">Now Showing</h2>
-        <div class="movies-grid">
+        
+        <div class="movie-grid">
             {% for movie in movies %}
             <div class="movie-card">
-                <img src="{{ url_for('static', filename='images/' + movie.image) }}" alt="{{ movie.title }}">
-                <div class="card-details">
+                <img src="{{ url_for('static', filename='images/' + movie.image) }}" alt="{{ movie.title }}" class="movie-poster">
+                <div class="movie-info">
                     <div class="movie-title">{{ movie.title }}</div>
                     <div class="movie-genre">{{ movie.genre }}</div>
-                    <a href="{{ url_for('booking', movie=movie.title, theater=movie.theater, address=movie.address, price=movie.price) }}" 
-                       class="btn btn-block">Book Now</a>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--primary); font-weight: bold;">₹{{ movie.price }}</span>
+                        <a href="{{ url_for('booking', movie=movie.title, theater=movie.theater, address=movie.address, price=movie.price) }}" 
+                           class="btn-primary" style="padding: 8px 15px; width: auto; margin: 0;">Book</a>
+                    </div>
                 </div>
             </div>
             {% endfor %}

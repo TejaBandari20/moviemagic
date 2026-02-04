@@ -4,32 +4,54 @@
     <meta charset="UTF-8">
     <title>Confirmed</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
-<body style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden;">
+<body>
+    <div class="ticket-container">
+        <div>
+            <h2 style="text-align: center; margin-bottom: 20px; animation: fadeUp 1s ease;">Booking Confirmed!</h2>
+            
+            <div class="ticket">
+                <div class="ticket-visual">
+                    <div style="position: absolute; bottom: 20px; left: 20px; color: white; z-index: 2;">
+                        <div style="font-size: 2rem; font-weight: 800;">{{ booking.movie_name }}</div>
+                        <div>{{ booking.theater }}</div>
+                    </div>
+                </div>
 
-    <h2 style="opacity: 0; animation: fadeInUp 1s 0.5s forwards;">Booking Confirmed!</h2>
-    <p style="color: #aaa; margin-bottom: 30px; opacity: 0; animation: fadeInUp 1s 0.8s forwards;">Email sent to {{ booking.booked_by }}</p>
+                <div class="ticket-details">
+                    <div style="color: #888; font-size: 0.9rem; margin-bottom: 30px;">BOOKING ID: #{{ booking.booking_id }}</div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: #aaa;">DATE</div>
+                            <div style="font-weight: 600;">{{ booking.date }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: #aaa;">TIME</div>
+                            <div style="font-weight: 600;">{{ booking.time }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: #aaa;">SEATS</div>
+                            <div style="font-weight: 600; color: var(--primary);">{{ booking.seats }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: #aaa;">PAID</div>
+                            <div style="font-weight: 600;">₹{{ booking.amount_paid }}</div>
+                        </div>
+                    </div>
 
-    <div class="ticket-wrapper">
-        <div class="ticket-card">
-            <div class="ticket-left">
-                <h3 style="color: #e50914; text-transform: uppercase;">{{ booking.movie_name }}</h3>
-                <p style="font-weight: bold;">{{ booking.theater }}</p>
-                
-                <div style="display: flex; gap: 30px; margin-top: 20px;">
-                    <div><span class="label">DATE</span><div class="value">{{ booking.date }}</div></div>
-                    <div><span class="label">TIME</span><div class="value">{{ booking.time }}</div></div>
-                    <div><span class="label">SEATS</span><div class="value" style="color: #e50914;">{{ booking.seats }}</div></div>
+                    <div style="border-top: 2px dashed #ddd; padding-top: 20px; text-align: center;">
+                        <img src="https://bwipjs-api.metafloor.com/?bcid=code128&text={{ booking.booking_id }}&scale=2&height=10" alt="barcode" style="opacity: 0.5;">
+                    </div>
                 </div>
             </div>
-            
-            <div class="ticket-right">
-                <div style="font-size: 2rem; font-weight: bold;">₹{{ booking.amount_paid }}</div>
-                <div style="font-size: 0.8rem; opacity: 0.8;">PAID</div>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="/dashboard" class="btn-outline">Download Ticket</a>
+                <a href="/dashboard" class="btn-primary" style="display: inline-block; width: auto; margin-left: 20px;">Back to Home</a>
             </div>
         </div>
     </div>
-
-    <a href="/dashboard" class="btn" style="margin-top: 50px; background: transparent; border: 1px solid white; opacity: 0; animation: fadeInUp 1s 2s forwards;">Back to Dashboard</a>
 </body>
 </html>

@@ -2,36 +2,42 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- BOOKING PAGE LOGIC ---
-    const bookingContainer = document.querySelector('.booking-container');
+    // --- Booking Logic ---
+    const container = document.querySelector('.booking-layout');
     
-    // Only run this code if we are actually on the booking page
-    if (bookingContainer) {
-        const seats = document.querySelectorAll('.seat');
+    if (container) {
+        const seats = document.querySelectorAll('.seat:not(.occupied)');
+        const pricePerSeat = parseInt(container.dataset.price);
         
+        // DOM Elements
+        const countEl = document.getElementById('count');
+        const totalEl = document.getElementById('total');
+        const inputSeats = document.getElementById('input-seats');
+        const inputAmount = document.getElementById('input-amount');
+
+        // Click Event
         seats.forEach(seat => {
             seat.addEventListener('click', () => {
                 seat.classList.toggle('selected');
-                updateBookingSummary();
+                updateTotal();
             });
         });
+
+        function updateTotal() {
+            const selectedSeats = document.querySelectorAll('.seat.selected');
+            const selectedCount = selectedSeats.length;
+
+            // UI Updates
+            countEl.innerText = selectedCount;
+            totalEl.innerText = selectedCount * pricePerSeat;
+
+            // Form Updates (Hidden Inputs)
+            // We generate seat labels like "A1", "A2" based on grid position if needed, 
+            // or just use the text inside the div if we added it.
+            const seatLabels = Array.from(selectedSeats).map(s => s.innerText || s.dataset.id).join(',');
+            
+            inputSeats.value = seatLabels;
+            inputAmount.value = selectedCount * pricePerSeat;
+        }
     }
 });
-
-function updateBookingSummary() {
-    const selectedSeats = document.querySelectorAll('.seat.selected');
-    
-    // Get the price from the HTML data-attribute (The "Professional" way)
-    const bookingContainer = document.querySelector('.booking-container');
-    const pricePerSeat = Number(bookingContainer.dataset.price); 
-    
-    const totalPrice = selectedSeats.length * pricePerSeat;
-    
-    // Update the UI
-    document.getElementById('total-price').innerText = "₹" + totalPrice;
-    
-    // Update Hidden Form Inputs
-    const seatLabels = Array.from(selectedSeats).map(s => s.innerText).join(',');
-    document.getElementById('seats-input').value = seatLabels;
-    document.getElementById('amount-input').value = totalPrice;
-}
