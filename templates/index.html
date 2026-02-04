@@ -8,13 +8,26 @@
 </head>
 <body>
     <div class="hero">
-        <h1 style="animation: fadeUp 1s ease;">YOUR CINEMA EXPERIENCE</h1>
-        <p style="font-size: 1.2rem; margin-bottom: 30px; color: #ccc;">Blockbusters. Popcorn. Magic.</p>
-        <a href="/login" class="btn-primary" style="font-size: 1.2rem; padding: 15px 40px; border-radius: 50px;">GET STARTED</a>
+        <h1 style="font-size: 5rem; font-weight: 800; animation: fadeUp 1s ease; margin-bottom: 10px;">
+            MOVIE MAGIC
+        </h1>
+        
+        <p style="font-size: 1.5rem; letter-spacing: 3px; margin-bottom: 40px; color: #ccc; text-transform: uppercase;">
+            You Experience The Cinema
+        </p>
+        
+        <a href="/login" class="btn-primary" style="font-size: 1rem; padding: 12px 30px; border-radius: 50px; width: auto; min-width: 150px;">
+            GET STARTED
+        </a>
     </div>
 
     <style>
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Ensure the button doesn't stretch on mobile */
+        .btn-primary {
+            display: inline-block; /* Forces button to hug text */
+        }
     </style>
 </body>
 </html>

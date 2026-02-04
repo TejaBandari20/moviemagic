@@ -2,23 +2,23 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- Booking Logic ---
     const container = document.querySelector('.booking-layout');
     
     if (container) {
-        const seats = document.querySelectorAll('.seat:not(.occupied)');
+        const seats = document.querySelectorAll('.seat');
         const pricePerSeat = parseInt(container.dataset.price);
         
         // DOM Elements
-        const countEl = document.getElementById('count');
         const totalEl = document.getElementById('total');
         const inputSeats = document.getElementById('input-seats');
         const inputAmount = document.getElementById('input-amount');
 
-        // Click Event
         seats.forEach(seat => {
             seat.addEventListener('click', () => {
+                // Toggle selection
                 seat.classList.toggle('selected');
+                
+                // Calculate and Update
                 updateTotal();
             });
         });
@@ -26,18 +26,22 @@ document.addEventListener('DOMContentLoaded', () => {
         function updateTotal() {
             const selectedSeats = document.querySelectorAll('.seat.selected');
             const selectedCount = selectedSeats.length;
+            const totalPrice = selectedCount * pricePerSeat;
 
-            // UI Updates
-            countEl.innerText = selectedCount;
-            totalEl.innerText = selectedCount * pricePerSeat;
+            // 1. Update the Total Price on screen
+            if (totalEl) {
+                totalEl.innerText = totalPrice;
+            }
 
-            // Form Updates (Hidden Inputs)
-            // We generate seat labels like "A1", "A2" based on grid position if needed, 
-            // or just use the text inside the div if we added it.
-            const seatLabels = Array.from(selectedSeats).map(s => s.innerText || s.dataset.id).join(',');
+            // 2. Update Hidden Form Inputs (for the backend)
+            if (inputSeats) {
+                const seatLabels = Array.from(selectedSeats).map(s => s.dataset.id).join(',');
+                inputSeats.value = seatLabels;
+            }
             
-            inputSeats.value = seatLabels;
-            inputAmount.value = selectedCount * pricePerSeat;
+            if (inputAmount) {
+                inputAmount.value = totalPrice;
+            }
         }
     }
 });
