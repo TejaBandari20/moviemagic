@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import boto3
-from boto3.dynamodb.conditions import Attr # IMPORTED FOR FILTERING
+from boto3.dynamodb.conditions import Attr
 import uuid
 import os
 from botocore.exceptions import ClientError
@@ -139,7 +139,8 @@ def confirm_booking():
         flash('Booking failed', 'danger')
         return redirect(url_for('dashboard'))
 
-# --- NEW ROUTE: USER PROFILE ---
+# --- USER PROFILE ROUTES ---
+
 @app.route('/profile')
 def profile():
     if 'user' not in session: return redirect(url_for('login'))
@@ -157,6 +158,33 @@ def profile():
         print(f"DB Error: {e}")
     
     return render_template('profile.html', user=session['user'], bookings=user_bookings)
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    if 'user' not in session: return redirect(url_for('login'))
+
+    new_name = request.form.get('name')
+    email = session['user']['email']
+
+    try:
+        # Update DynamoDB
+        users_table.update_item(
+            Key={'email': email},
+            UpdateExpression="set #n = :n",
+            ExpressionAttributeNames={'#n': 'name'},
+            ExpressionAttributeValues={':n': new_name}
+        )
+
+        # Update Session
+        session['user']['name'] = new_name
+        session.modified = True
+
+        flash('Profile updated successfully!', 'success')
+    except ClientError as e:
+        print(e)
+        flash('Error updating profile', 'danger')
+
+    return redirect(url_for('profile'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

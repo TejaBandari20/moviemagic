@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <title>Dashboard - MovieMagic</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="[https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap](https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap)" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
+    <div class="navbar">
         <div class="logo">MOVIEMAGIC</div>
+        
+        <!-- UPDATED USER MENU (No Logout Button) -->
         <div class="user-menu">
             <a href="{{ url_for('profile') }}" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                 <div style="width: 35px; height: 35px; background: #e50914; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold;">
@@ -16,13 +18,11 @@
                 </div>
                 <span style="color: #ccc;">Hi, {{ session['user']['name'] }}</span>
             </a>
-            <a href="/logout" class="btn-outline" style="margin-left: 15px;">Logout</a>
         </div>
-    </nav>
+    </div>
 
-    <div class="container">
+    <div class="container fade-in">
         <h2 class="section-title">Now Showing</h2>
-        
         <div class="movie-grid">
             {% for movie in movies %}
             <div class="movie-card">
