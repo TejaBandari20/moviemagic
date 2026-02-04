@@ -5,6 +5,96 @@
     <title>Admin Portal - MovieMagic</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Smooth Dropdown Styles */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+            margin: 10px 0;
+            user-select: none;
+        }
+        
+        .dropdown-trigger {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #aaa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-trigger:hover, .dropdown-trigger.active {
+            border-color: var(--primary);
+            background: rgba(0,0,0,0.5);
+            color: white;
+        }
+
+        .dropdown-options {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            right: 0;
+            background: #151f30; /* Darker card bg */
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            max-height: 0;
+            overflow-y: auto;
+            opacity: 0;
+            z-index: 100;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smooth easing */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            visibility: hidden;
+        }
+
+        .dropdown-options.open {
+            max-height: 300px;
+            opacity: 1;
+            visibility: visible;
+            top: 100%;
+        }
+
+        .option-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #ccc;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option-item:last-child { border-bottom: none; }
+
+        .option-item:hover {
+            background: rgba(229, 9, 20, 0.1);
+            color: white;
+            padding-left: 20px; /* Slide effect on hover */
+        }
+
+        .option-item.selected {
+            background: rgba(229, 9, 20, 0.8);
+            color: white;
+        }
+        
+        .option-item.selected::after {
+            content: '✓';
+            font-weight: bold;
+        }
+
+        .arrow {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+        }
+        .dropdown-trigger.active .arrow {
+            transform: rotate(180deg);
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar" style="background: #1a1a1a;">
@@ -20,7 +110,7 @@
         <div class="glass-card" style="max-width: 800px; margin: 0 auto 50px auto; text-align: left;">
             <h3 style="margin-bottom: 20px; color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 10px;">Add New Movie</h3>
             
-            <form action="/add_movie" method="POST">
+            <form action="/add_movie" method="POST" id="movieForm">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Movie Title</label>
@@ -29,35 +119,39 @@
                     
                     <div class="form-group">
                         <label>Genre</label>
-                        <!-- Hidden input to store comma-separated genres for backend compatibility -->
-                        <input type="hidden" name="genre" id="final_genre">
+                        <!-- Hidden input to store comma-separated genres for backend -->
+                        <input type="hidden" name="genre" id="final_genre" required>
                         
-                        <!-- Multi-select menu -->
-                        <select id="genre_select" multiple required style="width: 100%; padding: 15px; margin: 10px 0; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; outline: none; min-height: 140px; font-family: inherit;">
-                            <option value="Action">Action</option>
-                            <option value="Adventure">Adventure</option>
-                            <option value="Animation">Animation</option>
-                            <option value="Comedy">Comedy</option>
-                            <option value="Crime">Crime</option>
-                            <option value="Documentary">Documentary</option>
-                            <option value="Drama">Drama</option>
-                            <option value="Family">Family</option>
-                            <option value="Fantasy">Fantasy</option>
-                            <option value="History">History</option>
-                            <option value="Horror">Horror</option>
-                            <option value="Music">Music</option>
-                            <option value="Mystery">Mystery</option>
-                            <option value="Romance">Romance</option>
-                            <option value="Sci-Fi">Sci-Fi</option>
-                            <option value="Thriller">Thriller</option>
-                            <option value="War">War</option>
-                        </select>
-                        <small style="color: #888; font-size: 0.75rem; display: block; margin-top: -5px;">Hold Ctrl (Windows) or Cmd (Mac) to select multiple</small>
+                        <!-- Custom Dynamic Dropdown -->
+                        <div class="custom-dropdown" id="genre_dropdown">
+                            <div class="dropdown-trigger" onclick="toggleDropdown()">
+                                <span id="selected_text">Select Genres...</span>
+                                <span class="arrow">▼</span>
+                            </div>
+                            <div class="dropdown-options">
+                                <div class="option-item" onclick="toggleOption(this, 'Action')">Action</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Adventure')">Adventure</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Animation')">Animation</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Comedy')">Comedy</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Crime')">Crime</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Documentary')">Documentary</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Drama')">Drama</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Family')">Family</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Fantasy')">Fantasy</div>
+                                <div class="option-item" onclick="toggleOption(this, 'History')">History</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Horror')">Horror</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Music')">Music</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Mystery')">Mystery</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Romance')">Romance</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Sci-Fi')">Sci-Fi</div>
+                                <div class="option-item" onclick="toggleOption(this, 'Thriller')">Thriller</div>
+                                <div class="option-item" onclick="toggleOption(this, 'War')">War</div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label>Image URL (or Filename)</label>
-                        <!-- Updated Placeholder -->
                         <input type="text" name="image" required placeholder="Paste image link (https://...) OR filename (mad.jpg)">
                     </div>
                     <div class="form-group">
@@ -99,11 +193,65 @@
         </div>
     </div>
 
-    <!-- Script to handle multi-select logic -->
+    <!-- Script to handle dynamic multi-select -->
     <script>
-        document.getElementById('genre_select').addEventListener('change', function() {
-            const selected = Array.from(this.selectedOptions).map(option => option.value);
-            document.getElementById('final_genre').value = selected.join(', ');
+        let selectedGenres = [];
+
+        function toggleDropdown() {
+            const dropdown = document.querySelector('.dropdown-options');
+            const trigger = document.querySelector('.dropdown-trigger');
+            
+            dropdown.classList.toggle('open');
+            trigger.classList.toggle('active');
+        }
+
+        function toggleOption(element, value) {
+            element.classList.toggle('selected');
+            
+            if (selectedGenres.includes(value)) {
+                // Remove if already selected
+                selectedGenres = selectedGenres.filter(g => g !== value);
+            } else {
+                // Add if not selected
+                selectedGenres.push(value);
+            }
+            
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const display = document.getElementById('selected_text');
+            const hiddenInput = document.getElementById('final_genre');
+            
+            if (selectedGenres.length > 0) {
+                display.innerText = selectedGenres.join(', ');
+                display.style.color = 'white';
+            } else {
+                display.innerText = 'Select Genres...';
+                display.style.color = '#aaa';
+            }
+            
+            hiddenInput.value = selectedGenres.join(', ');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('genre_dropdown');
+            if (!dropdown.contains(e.target)) {
+                document.querySelector('.dropdown-options').classList.remove('open');
+                document.querySelector('.dropdown-trigger').classList.remove('active');
+            }
+        });
+        
+        // Prevent form submission if no genre selected
+        document.getElementById('movieForm').addEventListener('submit', function(e) {
+            if (selectedGenres.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one genre.');
+                const trigger = document.querySelector('.dropdown-trigger');
+                trigger.style.borderColor = '#e50914';
+                setTimeout(() => trigger.style.borderColor = 'rgba(255,255,255,0.1)', 2000);
+            }
         });
     </script>
 </body>
