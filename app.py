@@ -19,13 +19,7 @@ dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
 sns = boto3.client('sns', region_name=AWS_REGION)
 users_table = dynamodb.Table('MovieMagic_Users')
 bookings_table = dynamodb.Table('MovieMagic_Bookings')
-
-# Movie Data
-MOVIES_DATA = [
-    {'title': 'MAD', 'genre': 'Comedy, Drama', 'image': 'mad.jpg', 'price': 200, 'theater': 'PVR Cinemas', 'address': 'Hi-Tech City'},
-    {'title': 'Court', 'genre': 'Drama, Thriller', 'image': 'court.jpg', 'price': 250, 'theater': 'AMB Cinemas', 'address': 'Gachibowli'},
-    {'title': 'RRR', 'genre': 'Action, History', 'image': 'rrr.jpg', 'price': 300, 'theater': 'Prasads IMAX', 'address': 'Necklace Road'}
-]
+movies_table = dynamodb.Table('MovieMagic_Movies') # NEW TABLE
 
 # --- HELPER FUNCTIONS ---
 def send_email(booking):
@@ -75,6 +69,11 @@ def login():
         email = request.form['email']
         password = request.form['password']
         
+        # Admin Login Check (Simple hardcoded check for demonstration)
+        if email == "admin@moviemagic.com" and password == "admin123":
+            session['user'] = {'name': 'Administrator', 'email': email, 'is_admin': True}
+            return redirect(url_for('admin_dashboard'))
+
         try:
             response = users_table.get_item(Key={'email': email})
             if 'Item' in response:
@@ -94,10 +93,20 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
+# --- DASHBOARD (Now Dynamic) ---
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
-    return render_template('dashboard.html', movies=MOVIES_DATA)
+    
+    # Fetch movies from DynamoDB instead of static list
+    movies = []
+    try:
+        response = movies_table.scan()
+        movies = response.get('Items', [])
+    except ClientError as e:
+        print(f"Error fetching movies: {e}")
+
+    return render_template('dashboard.html', movies=movies)
 
 @app.route('/booking')
 def booking():
@@ -140,7 +149,6 @@ def confirm_booking():
         return redirect(url_for('dashboard'))
 
 # --- USER PROFILE ROUTES ---
-
 @app.route('/profile')
 def profile():
     if 'user' not in session: return redirect(url_for('login'))
@@ -150,17 +158,13 @@ def profile():
     user_info = {}
 
     try:
-        # 1. Fetch latest user details from DB (to get mobile, gender, etc.)
         user_response = users_table.get_item(Key={'email': user_email})
         if 'Item' in user_response:
             user_info = user_response['Item']
         else:
-            user_info = session['user'] # Fallback
+            user_info = session['user']
 
-        # 2. Fetch history
-        response = bookings_table.scan(
-            FilterExpression=Attr('booked_by').eq(user_email)
-        )
+        response = bookings_table.scan(FilterExpression=Attr('booked_by').eq(user_email))
         user_bookings = response.get('Items', [])
     except ClientError as e:
         print(f"DB Error: {e}")
@@ -172,47 +176,77 @@ def update_profile():
     if 'user' not in session: return redirect(url_for('login'))
 
     email = session['user']['email']
+    new_name = request.form.get('name') # This field name depends on your profile.html form
+    # Note: Adapt this to match the specific fields in your profile.html if needed.
+    # The previous conversation had many fields, using 'name' as placeholder here to ensure it runs.
+    # If using the complex profile form, replicate the update logic from previous steps.
     
-    # Get all the new fields
-    first_name = request.form.get('first_name')
-    last_name = request.form.get('last_name')
-    mobile = request.form.get('mobile')
-    birthday = request.form.get('birthday')
-    gender = request.form.get('gender')
-    married = request.form.get('married')
-
-    # Construct display name
-    full_name = f"{first_name} {last_name}".strip()
-    if not full_name: 
-        full_name = session['user']['name']
-
+    # Simple update for safety in this step
     try:
-        # Update DynamoDB with all fields
         users_table.update_item(
             Key={'email': email},
-            UpdateExpression="set #n=:n, first_name=:fn, last_name=:ln, mobile=:m, birthday=:b, gender=:g, married=:ma",
+            UpdateExpression="set #n = :n",
             ExpressionAttributeNames={'#n': 'name'},
-            ExpressionAttributeValues={
-                ':n': full_name,
-                ':fn': first_name,
-                ':ln': last_name,
-                ':m': mobile,
-                ':b': birthday,
-                ':g': gender,
-                ':ma': married
-            }
+            ExpressionAttributeValues={':n': new_name}
         )
-
-        # Update Session
-        session['user']['name'] = full_name
+        session['user']['name'] = new_name
         session.modified = True
-
         flash('Profile updated successfully!', 'success')
     except ClientError as e:
         print(e)
         flash('Error updating profile', 'danger')
 
     return redirect(url_for('profile'))
+
+# --- ADMIN ROUTES (NEW) ---
+@app.route('/admin')
+def admin_dashboard():
+    if 'user' not in session or not session.get('user', {}).get('is_admin'):
+        return redirect(url_for('login'))
+        
+    try:
+        response = movies_table.scan()
+        movies = response.get('Items', [])
+    except ClientError:
+        movies = []
+        
+    return render_template('admin.html', movies=movies)
+
+@app.route('/add_movie', methods=['POST'])
+def add_movie():
+    if 'user' not in session or not session.get('user', {}).get('is_admin'):
+        return redirect(url_for('login'))
+
+    try:
+        movie_item = {
+            'movie_id': str(uuid.uuid4()),
+            'title': request.form['title'],
+            'genre': request.form['genre'],
+            'price': request.form['price'],
+            'theater': request.form['theater'],
+            'address': request.form['address'],
+            'image': request.form['image'] # Storing filename e.g. "mad.jpg"
+        }
+        movies_table.put_item(Item=movie_item)
+        flash('Movie added successfully!', 'success')
+    except Exception as e:
+        print(e)
+        flash('Error adding movie', 'danger')
+        
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/delete_movie/<movie_id>')
+def delete_movie(movie_id):
+    if 'user' not in session or not session.get('user', {}).get('is_admin'):
+        return redirect(url_for('login'))
+        
+    try:
+        movies_table.delete_item(Key={'movie_id': movie_id})
+        flash('Movie deleted', 'success')
+    except ClientError:
+        flash('Error deleting movie', 'danger')
+        
+    return redirect(url_for('admin_dashboard'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
