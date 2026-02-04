@@ -12,7 +12,7 @@
         <h2 style="margin-bottom: 20px;">Booking Confirmed!</h2>
         
         <div class="ticket" id="ticket-capture">
-            <div class="ticket-visual" style="background-color: #e50914;"></div>
+            <div class="ticket-visual"></div>
             <div class="ticket-details">
                 <h2 style="color: #e50914; text-transform: uppercase; margin-bottom: 5px;">{{ booking.movie_name }}</h2>
                 <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">{{ booking.theater }}</p>
@@ -38,7 +38,6 @@
         function downloadTicket() {
             const ticketElement = document.getElementById("ticket-capture");
             html2canvas(ticketElement).then(canvas => {
-                // Convert canvas to image and trigger download
                 const link = document.createElement("a");
                 link.download = 'MovieMagic-Ticket.png';
                 link.href = canvas.toDataURL();

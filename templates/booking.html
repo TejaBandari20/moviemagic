@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Book Seats</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
 </head>
 <body>
@@ -18,27 +18,22 @@
             
             <div class="theater-side">
                 <h2 style="margin-bottom: 5px;">{{ movie }}</h2>
-                <p style="color: #aaa; margin-bottom: 40px;">{{ theater }}</p>
+                <p style="color: #aaa; margin-bottom: 40px;">{{ theater }} | {{ address }}</p>
 
-                <div class="screen">CINEMA SCREEN</div>
+                <div class="screen">SCREEN</div>
 
                 <div class="seats-grid">
                     {% for row in ['A', 'B', 'C', 'D', 'E', 'F'] %}
                         {% for col in range(1, 9) %}
-                        <div class="seat" data-id="{{ row }}{{ col }}" title="{{ row }}{{ col }}"></div>
+                        <div class="seat" data-id="{{ row }}{{ col }}">{{ row }}{{ col }}</div>
                         {% endfor %}
                     {% endfor %}
-                </div>
-
-                <div style="display: flex; justify-content: center; gap: 30px; margin-top: 40px;">
-                    <div style="display: flex; align-items: center; gap: 10px;"><div class="seat" style="width: 20px; height: 20px; cursor: default;"></div> Available</div>
-                    <div style="display: flex; align-items: center; gap: 10px;"><div class="seat selected" style="width: 20px; height: 20px; cursor: default;"></div> Selected</div>
                 </div>
             </div>
 
             <div class="summary-side">
                 <div class="booking-card">
-                    <h3 style="border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">Booking Summary</h3>
+                    <h3 style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Booking</h3>
                     
                     <form action="/confirm_booking" method="POST">
                         <input type="hidden" name="movie" value="{{ movie }}">
@@ -46,31 +41,26 @@
                         <input type="hidden" name="address" value="{{ address }}">
                         <input type="hidden" name="seats" id="input-seats" required>
                         <input type="hidden" name="amount" id="input-amount">
-                        
-                        <div style="margin-bottom: 20px;">
-                            <label style="font-size: 0.8rem; color: #aaa;">DATE</label>
+
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 0.8rem; color: #888;">DATE</label>
                             <input type="date" name="date" required style="width: 100%; background: #0b0c15; border: 1px solid #333; color: white; padding: 10px; border-radius: 5px;">
                         </div>
-                        <div style="margin-bottom: 20px;">
-                            <label style="font-size: 0.8rem; color: #aaa;">TIME</label>
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 0.8rem; color: #888;">TIME</label>
                             <select name="time" required style="width: 100%; background: #0b0c15; border: 1px solid #333; color: white; padding: 10px; border-radius: 5px;">
                                 <option>10:00 AM</option>
                                 <option>01:00 PM</option>
                                 <option>04:00 PM</option>
-                                <option>07:00 PM</option>
                             </select>
                         </div>
 
-                        <div style="display: flex; justify-content: space-between; font-size: 1.1rem; margin-top: 30px;">
-                            <span>Seats Selected</span>
-                            <span id="count" style="color: var(--primary);">0</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold; margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-top: 30px;">
                             <span>Total</span>
-                            <span>₹<span id="total">0</span></span>
+                            <span style="font-weight: bold; font-size: 1.2rem;">₹<span id="total">0</span></span>
                         </div>
 
-                        <button type="submit" class="btn-primary" style="margin-top: 20px;">PAY NOW</button>
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px;">CONFIRM</button>
                     </form>
                 </div>
             </div>
