@@ -5,12 +5,14 @@
     <title>Confirmed</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Library for downloading images -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="ticket-container">
         <h2 style="margin-bottom: 20px;">Booking Confirmed!</h2>
         
+        <!-- ID 'ticket-capture' is targeted by JS -->
         <div class="ticket" id="ticket-capture">
             <div class="ticket-visual"></div>
             <div class="ticket-details">
@@ -38,18 +40,33 @@
         function downloadTicket() {
             const ticketElement = document.getElementById("ticket-capture");
             
-            // IMPROVED CONFIGURATION
-            html2canvas(ticketElement, {
-                scale: 2,                // 1. High Resolution (Retina quality)
-                useCORS: true,           // 2. Allow background images to load
-                backgroundColor: "#ffffff", // 3. Force white background (prevents transparency glitch)
-                scrollY: -window.scrollY // 4. Fixes issue if user scrolled down
-            }).then(canvas => {
-                const link = document.createElement("a");
-                link.download = 'MovieMagic-Ticket.png';
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-            });
+            // 1. TEMPORARILY REMOVE 3D STYLES
+            // (This fixes the squashed/glitchy image issue)
+            const originalAnimation = ticketElement.style.animation;
+            const originalTransform = ticketElement.style.transform;
+            
+            ticketElement.style.animation = "none";
+            ticketElement.style.transform = "none";
+            
+            // 2. WAIT 100ms FOR STYLES TO RESET, THEN CAPTURE
+            setTimeout(() => {
+                html2canvas(ticketElement, {
+                    scale: 3,                    // High resolution
+                    useCORS: true,               // Allow loading local images
+                    backgroundColor: "#ffffff",  // Force white background
+                    scrollY: -window.scrollY     // Fix scroll offsets
+                }).then(canvas => {
+                    // 3. DOWNLOAD
+                    const link = document.createElement("a");
+                    link.download = 'MovieMagic-Ticket.png';
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                    
+                    // 4. RESTORE ANIMATION (Optional)
+                    ticketElement.style.animation = originalAnimation;
+                    ticketElement.style.transform = originalTransform;
+                });
+            }, 100);
         }
     </script>
 </body>
