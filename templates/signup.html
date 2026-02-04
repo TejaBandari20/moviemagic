@@ -1,19 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sign Up - MovieMagic</title>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <!-- Reuse the same styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h2>CREATE ACCOUNT</h2>
-        <form method="POST">
-            <input type="text" name="name" placeholder="Full Name" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit" class="btn">SIGN UP</button>
-        </form>
-        <p>Already have an account? <a href="/login">Login Here</a></p>
+    <div class="auth-overlay">
+        <div class="auth-modal">
+            <div class="modal-header">
+                <h2>Create an Account</h2>
+                <!-- Close button returns to home -->
+                <a href="/" class="close-btn">&times;</a>
+            </div>
+
+            <!-- 1. Signup Form (Name, Email, Password) -->
+            <form method="POST" action="/signup" style="margin-bottom: 20px;">
+                <input type="text" name="name" placeholder="Full Name" required class="modal-input">
+                <input type="email" name="email" placeholder="Email Address" required class="modal-input">
+                <input type="password" name="password" placeholder="Password" required class="modal-input">
+                <button type="submit" class="btn-primary modal-submit">SIGN UP</button>
+            </form>
+
+            <div class="divider">OR</div>
+
+            <!-- 2. Continue with Google -->
+            <button class="social-btn">
+                <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google"> 
+                Continue with Google
+            </button>
+
+            <!-- Login Link -->
+            <div style="font-size: 0.85rem; color: #666; margin-top: 15px;">
+                Already have an account? <a href="/login" style="color: #e50914; font-weight: bold;">Login</a>
+            </div>
+
+            <p class="terms">
+                I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>
+            </p>
+        </div>
     </div>
 </body>
 </html>
