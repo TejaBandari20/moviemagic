@@ -12,7 +12,7 @@
     <div class="ticket-container">
         <h2 style="margin-bottom: 20px;">Booking Confirmed!</h2>
         
-        <!-- ID 'ticket-capture' is targeted by JS -->
+        <!-- Ticket Capture Area -->
         <div class="ticket" id="ticket-capture">
             <div class="ticket-visual"></div>
             <div class="ticket-details">
@@ -26,7 +26,12 @@
                     <div><span style="color: #aaa; font-size: 0.7rem;">PAID</span><br><b>₹{{ booking.amount_paid }}</b></div>
                 </div>
                 
-                <p style="margin-top: 20px; font-size: 0.7rem; color: #ccc;">ID: {{ booking.booking_id }}</p>
+                <!-- BARCODE SECTION ADDED HERE -->
+                <div style="border-top: 2px dashed #ddd; padding-top: 20px; text-align: center; margin-top: 20px;">
+                    <img src="https://bwipjs-api.metafloor.com/?bcid=code128&text={{ booking.booking_id }}&scale=2&height=8&includetext" 
+                         alt="Barcode" 
+                         style="width: 100%; height: auto; opacity: 0.8;">
+                </div>
             </div>
         </div>
 
@@ -40,29 +45,27 @@
         function downloadTicket() {
             const ticketElement = document.getElementById("ticket-capture");
             
-            // 1. TEMPORARILY REMOVE 3D STYLES
-            // (This fixes the squashed/glitchy image issue)
+            // 1. Temporarily remove 3D animation to prevent glitch
             const originalAnimation = ticketElement.style.animation;
             const originalTransform = ticketElement.style.transform;
             
             ticketElement.style.animation = "none";
             ticketElement.style.transform = "none";
             
-            // 2. WAIT 100ms FOR STYLES TO RESET, THEN CAPTURE
+            // 2. Capture
             setTimeout(() => {
                 html2canvas(ticketElement, {
-                    scale: 3,                    // High resolution
-                    useCORS: true,               // Allow loading local images
-                    backgroundColor: "#ffffff",  // Force white background
-                    scrollY: -window.scrollY     // Fix scroll offsets
+                    scale: 3,
+                    useCORS: true, 
+                    backgroundColor: "#ffffff",
+                    scrollY: -window.scrollY
                 }).then(canvas => {
-                    // 3. DOWNLOAD
                     const link = document.createElement("a");
                     link.download = 'MovieMagic-Ticket.png';
                     link.href = canvas.toDataURL("image/png");
                     link.click();
                     
-                    // 4. RESTORE ANIMATION (Optional)
+                    // 3. Restore Animation
                     ticketElement.style.animation = originalAnimation;
                     ticketElement.style.transform = originalTransform;
                 });
