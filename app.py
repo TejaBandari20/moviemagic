@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import boto3
 from boto3.dynamodb.conditions import Attr
+from decimal import Decimal
 import uuid
 import os
 from botocore.exceptions import ClientError
@@ -21,7 +22,17 @@ users_table = dynamodb.Table('MovieMagic_Users')
 bookings_table = dynamodb.Table('MovieMagic_Bookings')
 movies_table = dynamodb.Table('MovieMagic_Movies')
 
-# --- HELPER FUNCTIONS ---
+# --- HELPER: Convert DynamoDB Decimals to Integers/Floats ---
+# This is REQUIRED for the Edit button to work in the Admin Portal
+def replace_decimals(obj):
+    if isinstance(obj, list):
+        return [replace_decimals(i) for i in obj]
+    elif isinstance(obj, dict):
+        return {k: replace_decimals(v) for k, v in obj.items()}
+    elif isinstance(obj, Decimal):
+        return int(obj) if obj % 1 == 0 else float(obj)
+    return obj
+
 def send_email(booking):
     if not SNS_TOPIC_ARN: return False
     try:
@@ -93,12 +104,12 @@ def logout():
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
-    movies = []
     try:
         response = movies_table.scan()
-        movies = response.get('Items', [])
+        # Clean data before sending to template
+        movies = replace_decimals(response.get('Items', [])) 
     except ClientError as e:
-        print(f"Error fetching movies: {e}")
+        movies = []
     return render_template('dashboard.html', movies=movies)
 
 @app.route('/movie/<movie_id>')
@@ -106,7 +117,7 @@ def movie_details(movie_id):
     if 'user' not in session: return redirect(url_for('login'))
     try:
         response = movies_table.get_item(Key={'movie_id': movie_id})
-        movie = response.get('Item')
+        movie = replace_decimals(response.get('Item'))
         if not movie: 
             flash('Movie not found', 'danger')
             return redirect(url_for('dashboard'))
@@ -129,15 +140,12 @@ def booking():
 @app.route('/payment', methods=['POST'])
 def payment():
     if 'user' not in session: return redirect(url_for('login'))
-    # Pass data to the simulated payment page
     return render_template('payment.html', booking_details=request.form)
 
 @app.route('/confirm_booking', methods=['POST'])
 def confirm_booking():
     if 'user' not in session: return redirect(url_for('login'))
-    
     data = request.form
-    
     try:
         booking_id = f"MM-{datetime.now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8]}"
         fake_payment_id = f"PAY-{str(uuid.uuid4())[:12].upper()}"
@@ -159,9 +167,7 @@ def confirm_booking():
         
         bookings_table.put_item(Item=booking_item)
         send_email(booking_item)
-        
         return render_template('confirmation.html', booking=booking_item)
-
     except Exception as e:
         print(e)
         flash('Booking failed.', 'danger')
@@ -172,30 +178,23 @@ def confirm_booking():
 @app.route('/profile')
 def profile():
     if 'user' not in session: return redirect(url_for('login'))
-    
     user_email = session['user']['email']
     user_bookings = []
     user_info = {}
-
     try:
         user_response = users_table.get_item(Key={'email': user_email})
-        if 'Item' in user_response:
-            user_info = user_response['Item']
-        else:
-            user_info = session['user']
-
+        user_info = user_response.get('Item', session['user'])
         response = bookings_table.scan(FilterExpression=Attr('booked_by').eq(user_email))
-        user_bookings = response.get('Items', [])
-    except ClientError as e:
-        print(f"DB Error: {e}")
-    
+        user_bookings = replace_decimals(response.get('Items', []))
+    except ClientError:
+        pass
     return render_template('profile.html', user=user_info, bookings=user_bookings)
 
 @app.route('/update_profile', methods=['POST'])
 def update_profile():
     if 'user' not in session: return redirect(url_for('login'))
-
     email = session['user']['email']
+    
     fields = {
         'first_name': request.form.get('first_name', ''),
         'last_name': request.form.get('last_name', ''),
@@ -204,32 +203,23 @@ def update_profile():
         'gender': request.form.get('gender', ''),
         'married': request.form.get('married', '')
     }
-    
-    fields['name'] = f"{fields['first_name']} {fields['last_name']}".strip()
-    if not fields['name']:
-        fields['name'] = session['user']['name']
+    fields['name'] = f"{fields['first_name']} {fields['last_name']}".strip() or session['user']['name']
 
     try:
-        update_expr = "set #n=:n, first_name=:fn, last_name=:ln, mobile=:m, birthday=:b, gender=:g, married=:ma"
-        expr_names = {'#n': 'name'}
-        expr_values = {
-            ':n': fields['name'], ':fn': fields['first_name'], ':ln': fields['last_name'],
-            ':m': fields['mobile'], ':b': fields['birthday'], ':g': fields['gender'], ':ma': fields['married']
-        }
-
         users_table.update_item(
             Key={'email': email},
-            UpdateExpression=update_expr,
-            ExpressionAttributeNames=expr_names,
-            ExpressionAttributeValues=expr_values
+            UpdateExpression="set #n=:n, first_name=:fn, last_name=:ln, mobile=:m, birthday=:b, gender=:g, married=:ma",
+            ExpressionAttributeNames={'#n': 'name'},
+            ExpressionAttributeValues={
+                ':n': fields['name'], ':fn': fields['first_name'], ':ln': fields['last_name'],
+                ':m': fields['mobile'], ':b': fields['birthday'], ':g': fields['gender'], ':ma': fields['married']
+            }
         )
         session['user']['name'] = fields['name']
         session.modified = True
         flash('Profile updated successfully!', 'success')
-    except ClientError as e:
-        print(e)
+    except ClientError:
         flash('Error updating profile', 'danger')
-
     return redirect(url_for('profile'))
 
 # --- ADMIN PORTAL ---
@@ -238,20 +228,17 @@ def update_profile():
 def admin_dashboard():
     if 'user' not in session or not session.get('user', {}).get('is_admin'):
         return redirect(url_for('login'))
-        
     try:
         response = movies_table.scan()
-        movies = response.get('Items', [])
+        # Clean data here too so the Edit button JSON works
+        movies = replace_decimals(response.get('Items', []))
     except ClientError:
         movies = []
-        
     return render_template('admin.html', movies=movies)
 
 @app.route('/add_movie', methods=['POST'])
 def add_movie():
-    if 'user' not in session or not session.get('user', {}).get('is_admin'):
-        return redirect(url_for('login'))
-
+    if 'user' not in session or not session.get('user', {}).get('is_admin'): return redirect(url_for('login'))
     try:
         movie_item = {
             'movie_id': str(uuid.uuid4()),
@@ -261,8 +248,9 @@ def add_movie():
             'duration': request.form['duration'],
             'image': request.form['image'],
             'trailer': request.form['trailer'],
-            'price': request.form['price'],
-            'rating': request.form['rating'],
+            # Convert to Decimal for DB storage
+            'price': Decimal(request.form['price']),
+            'rating': Decimal(request.form['rating']),
             'theater': request.form['theater'],
             'address': request.form['address'],
             'description': request.form['description']
@@ -272,65 +260,43 @@ def add_movie():
     except Exception as e:
         print(e)
         flash('Error adding movie', 'danger')
-        
     return redirect(url_for('admin_dashboard'))
 
-# --- EDIT MOVIE ROUTE (NEW) ---
-@app.route('/edit_movie/<movie_id>', methods=['GET', 'POST'])
+@app.route('/edit_movie/<movie_id>', methods=['POST'])
 def edit_movie(movie_id):
-    if 'user' not in session or not session.get('user', {}).get('is_admin'):
-        return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        try:
-            # Update DynamoDB with all fields
-            movies_table.update_item(
-                Key={'movie_id': movie_id},
-                UpdateExpression="set title=:t, genre=:g, language=:l, duration=:d, image=:i, trailer=:tr, price=:p, rating=:r, theater=:th, address=:a, description=:desc",
-                ExpressionAttributeValues={
-                    ':t': request.form['title'],
-                    ':g': request.form['genre'],
-                    ':l': request.form['language'],
-                    ':d': request.form['duration'],
-                    ':i': request.form['image'],
-                    ':tr': request.form['trailer'],
-                    ':p': request.form['price'],
-                    ':r': request.form['rating'],
-                    ':th': request.form['theater'],
-                    ':a': request.form['address'],
-                    ':desc': request.form['description']
-                }
-            )
-            flash('Movie updated successfully!', 'success')
-            return redirect(url_for('admin_dashboard'))
-        except ClientError as e:
-            print(e)
-            flash('Error updating movie', 'danger')
-            return redirect(url_for('admin_dashboard'))
-    
-    # GET Request: Fetch movie details to pre-fill the form
+    if 'user' not in session or not session.get('user', {}).get('is_admin'): return redirect(url_for('login'))
     try:
-        response = movies_table.get_item(Key={'movie_id': movie_id})
-        movie = response.get('Item')
-        if not movie:
-            flash('Movie not found', 'danger')
-            return redirect(url_for('admin_dashboard'))
-        return render_template('edit_movie.html', movie=movie)
-    except ClientError:
-        flash('Error loading movie', 'danger')
-        return redirect(url_for('admin_dashboard'))
+        movies_table.update_item(
+            Key={'movie_id': movie_id},
+            UpdateExpression="set title=:t, genre=:g, language=:l, duration=:d, image=:i, trailer=:tr, price=:p, rating=:r, theater=:th, address=:a, description=:desc",
+            ExpressionAttributeValues={
+                ':t': request.form['title'],
+                ':g': request.form['genre'],
+                ':l': request.form['language'],
+                ':d': request.form['duration'],
+                ':i': request.form['image'],
+                ':tr': request.form['trailer'],
+                ':p': Decimal(request.form['price']),
+                ':r': Decimal(request.form['rating']),
+                ':th': request.form['theater'],
+                ':a': request.form['address'],
+                ':desc': request.form['description']
+            }
+        )
+        flash('Movie updated successfully!', 'success')
+    except ClientError as e:
+        print(e)
+        flash('Error updating movie', 'danger')
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/delete_movie/<movie_id>')
 def delete_movie(movie_id):
-    if 'user' not in session or not session.get('user', {}).get('is_admin'):
-        return redirect(url_for('login'))
-        
+    if 'user' not in session or not session.get('user', {}).get('is_admin'): return redirect(url_for('login'))
     try:
         movies_table.delete_item(Key={'movie_id': movie_id})
         flash('Movie deleted', 'success')
     except ClientError:
         flash('Error deleting movie', 'danger')
-        
     return redirect(url_for('admin_dashboard'))
 
 if __name__ == '__main__':

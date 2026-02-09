@@ -7,107 +7,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         /* Custom Smooth Dropdown Styles */
-        .custom-dropdown {
-            position: relative;
-            width: 100%;
-            margin: 10px 0;
-            user-select: none;
-        }
-        
-        .dropdown-trigger {
-            width: 100%;
-            padding: 15px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: #aaa;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-        
-        .dropdown-trigger:hover, .dropdown-trigger.active {
-            border-color: var(--primary);
-            background: rgba(0,0,0,0.5);
-            color: white;
-        }
-
-        .dropdown-options {
-            position: absolute;
-            top: 110%;
-            left: 0;
-            right: 0;
-            background: #151f30; /* Darker card bg */
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            max-height: 0;
-            overflow-y: auto;
-            opacity: 0;
-            z-index: 100;
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smooth easing */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            visibility: hidden;
-        }
-
-        .dropdown-options.open {
-            max-height: 300px;
-            opacity: 1;
-            visibility: visible;
-            top: 100%;
-        }
-
-        .option-item {
-            padding: 12px 15px;
-            cursor: pointer;
-            transition: background 0.2s;
-            color: #ccc;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
+        .custom-dropdown { position: relative; width: 100%; margin: 10px 0; user-select: none; }
+        .dropdown-trigger { width: 100%; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #aaa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; }
+        .dropdown-trigger:hover, .dropdown-trigger.active { border-color: var(--primary); background: rgba(0,0,0,0.5); color: white; }
+        .dropdown-options { position: absolute; top: 110%; left: 0; right: 0; background: #151f30; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; max-height: 0; overflow-y: auto; opacity: 0; z-index: 100; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); visibility: hidden; }
+        .dropdown-options.open { max-height: 300px; opacity: 1; visibility: visible; top: 100%; }
+        .option-item { padding: 12px 15px; cursor: pointer; transition: background 0.2s; color: #ccc; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; }
         .option-item:last-child { border-bottom: none; }
-
-        .option-item:hover {
-            background: rgba(229, 9, 20, 0.1);
-            color: white;
-            padding-left: 20px; /* Slide effect on hover */
-        }
-
-        .option-item.selected {
-            background: rgba(229, 9, 20, 0.8);
-            color: white;
-        }
-        
-        .option-item.selected::after {
-            content: '✓';
-            font-weight: bold;
-        }
-
-        .arrow {
-            transition: transform 0.3s ease;
-            font-size: 0.8rem;
-        }
-        .dropdown-trigger.active .arrow {
-            transform: rotate(180deg);
-        }
-
-        /* Textarea Style */
-        textarea {
-            width: 100%;
-            padding: 15px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: white;
-            outline: none;
-            font-family: inherit;
-            resize: vertical;
-        }
+        .option-item:hover { background: rgba(229, 9, 20, 0.1); color: white; padding-left: 20px; }
+        .option-item.selected { background: rgba(229, 9, 20, 0.8); color: white; }
+        .option-item.selected::after { content: '✓'; font-weight: bold; }
+        .arrow { transition: transform 0.3s ease; font-size: 0.8rem; }
+        .dropdown-trigger.active .arrow { transform: rotate(180deg); }
+        textarea { width: 100%; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; outline: none; font-family: inherit; resize: vertical; }
         textarea:focus { border-color: var(--primary); }
+        
+        /* Cancel Button Style (Hidden by default) */
+        #cancelEdit { display: none; background: #555; margin-left: 10px; }
+        #cancelEdit:hover { background: #777; }
     </style>
 </head>
 <body>
@@ -120,16 +37,16 @@
     </nav>
 
     <div class="container">
-        <!-- Add Movie Form -->
-        <div class="glass-card" style="max-width: 900px; margin: 0 auto 50px auto; text-align: left;">
-            <h3 style="margin-bottom: 20px; color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 10px;">Add New Movie</h3>
+        <!-- Add/Edit Movie Form -->
+        <div class="glass-card" style="max-width: 900px; margin: 0 auto 50px auto; text-align: left;" id="formSection">
+            <h3 style="margin-bottom: 20px; color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 10px;" id="formTitle">Add New Movie</h3>
             
             <form action="/add_movie" method="POST" id="movieForm">
                 <div class="form-grid">
                     <!-- Row 1: Basic Info -->
                     <div class="form-group">
                         <label>Movie Title</label>
-                        <input type="text" name="title" required placeholder="e.g. Inception">
+                        <input type="text" name="title" id="title" required placeholder="e.g. Inception">
                     </div>
                     
                     <div class="form-group">
@@ -141,16 +58,9 @@
                                 <span class="arrow">▼</span>
                             </div>
                             <div class="dropdown-options">
-                                <div class="option-item" onclick="toggleOption(this, 'Action', 'genre')">Action</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Adventure', 'genre')">Adventure</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Animation', 'genre')">Animation</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Comedy', 'genre')">Comedy</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Crime', 'genre')">Crime</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Drama', 'genre')">Drama</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Fantasy', 'genre')">Fantasy</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Horror', 'genre')">Horror</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Sci-Fi', 'genre')">Sci-Fi</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Thriller', 'genre')">Thriller</div>
+                                {% for g in ['Action','Adventure','Animation','Comedy','Crime','Drama','Fantasy','Horror','Sci-Fi','Thriller'] %}
+                                <div class="option-item" data-value="{{ g }}" onclick="toggleOption(this, '{{ g }}', 'genre')">{{ g }}</div>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
@@ -165,66 +75,59 @@
                                 <span class="arrow">▼</span>
                             </div>
                             <div class="dropdown-options">
-                                <div class="option-item" onclick="toggleOption(this, 'English', 'language')">English</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Hindi', 'language')">Hindi</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Telugu', 'language')">Telugu</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Tamil', 'language')">Tamil</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Malayalam', 'language')">Malayalam</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Kannada', 'language')">Kannada</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Bengali', 'language')">Bengali</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Marathi', 'language')">Marathi</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Punjabi', 'language')">Punjabi</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Gujarati', 'language')">Gujarati</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Urdu', 'language')">Urdu</div>
-                                <div class="option-item" onclick="toggleOption(this, 'French', 'language')">French</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Spanish', 'language')">Spanish</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Korean', 'language')">Korean</div>
-                                <div class="option-item" onclick="toggleOption(this, 'Japanese', 'language')">Japanese</div>
+                                {% for l in ['English','Hindi','Telugu','Tamil','Malayalam','Kannada','Spanish','Korean'] %}
+                                <div class="option-item" data-value="{{ l }}" onclick="toggleOption(this, '{{ l }}', 'language')">{{ l }}</div>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Duration</label>
-                        <input type="text" name="duration" required placeholder="e.g. 2h 30m">
+                        <input type="text" name="duration" id="duration" required placeholder="e.g. 2h 30m">
                     </div>
 
                     <!-- Row 3: Media & Rating -->
                     <div class="form-group">
                         <label>Image Filename / URL</label>
-                        <input type="text" name="image" required placeholder="mad.jpg OR https://...">
+                        <input type="text" name="image" id="image" required placeholder="mad.jpg OR https://...">
                     </div>
                     <div class="form-group">
                         <label>Trailer URL (YouTube)</label>
-                        <input type="text" name="trailer" placeholder="https://www.youtube.com/watch?v=...">
+                        <input type="text" name="trailer" id="trailer" placeholder="https://www.youtube.com/watch?v=...">
                     </div>
 
                     <!-- Row 4: Pricing & Location -->
                     <div class="form-group">
                         <label>Ticket Price (₹)</label>
-                        <input type="number" name="price" required placeholder="e.g. 250">
+                        <input type="number" name="price" id="price" required placeholder="e.g. 250">
                     </div>
                     <div class="form-group">
                         <label>IMDb Rating</label>
-                        <input type="number" step="0.1" name="rating" placeholder="e.g. 8.5">
+                        <input type="number" step="0.1" name="rating" id="rating" placeholder="e.g. 8.5">
                     </div>
 
                     <div class="form-group">
                         <label>Theater Name</label>
-                        <input type="text" name="theater" required placeholder="e.g. PVR Cinemas">
+                        <input type="text" name="theater" id="theater" required placeholder="e.g. PVR Cinemas">
                     </div>
                     <div class="form-group">
                         <label>Location</label>
-                        <input type="text" name="address" required placeholder="e.g. Forum Mall, Hyderabad">
+                        <input type="text" name="address" id="address" required placeholder="e.g. Forum Mall, Hyderabad">
                     </div>
 
                     <!-- Row 5: Description (Full Width) -->
                     <div class="form-group" style="grid-column: span 2;">
                         <label>Synopsis / Description</label>
-                        <textarea name="description" rows="3" placeholder="Enter movie plot summary..." required></textarea>
+                        <textarea name="description" id="description" rows="3" placeholder="Enter movie plot summary..." required></textarea>
                     </div>
                 </div>
-                <button type="submit" class="btn-primary" style="margin-top: 20px;">Add Movie</button>
+                
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary" id="submitBtn">Add Movie</button>
+                    <!-- CANCEL BUTTON: Resets form to Add mode -->
+                    <button type="button" class="btn-primary" id="cancelEdit" onclick="resetForm()">Cancel</button>
+                </div>
             </form>
         </div>
 
@@ -238,8 +141,16 @@
                         <h4 style="color: var(--primary); margin-bottom: 5px; font-size: 1.2rem;">{{ movie.title }}</h4>
                         <p style="font-size: 0.9rem; color: #ccc;">{{ movie.theater }} | {{ movie.language }}</p>
                     </div>
-                    <div class="history-right">
+                    <div class="history-right" style="gap: 10px;">
                         <div class="tag">₹{{ movie.price }}</div>
+                        
+                        <!-- EDIT BUTTON: Triggers JS to populate form by ID -->
+                        <button class="btn-primary" 
+                                style="background: #007bff; padding: 5px 15px; font-size: 0.8rem; border: none;"
+                                onclick="editMovie('{{ movie.movie_id }}')">
+                            Edit
+                        </button>
+                        
                         <a href="/delete_movie/{{ movie.movie_id }}" class="btn-primary" style="background: #b20710; padding: 5px 15px; font-size: 0.8rem;">Delete</a>
                     </div>
                 </div>
@@ -250,13 +161,99 @@
         </div>
     </div>
 
-    <!-- Script to handle dynamic multi-select -->
+    <!-- Script to handle dynamic multi-select AND Edit Logic -->
+    <!-- FIX: Move data to a separate JSON script block to prevent JS linter errors -->
+    <script type="application/json" id="movies-data">
+        {{ movies | tojson | safe }}
+    </script>
+
     <script>
-        const selectionState = {
+        // Store all movies data globally to use in edit function
+        // FIX: Read from the script tag instead of embedding Jinja directly
+        const allMovies = JSON.parse(document.getElementById('movies-data').textContent);
+        
+        let selectionState = {
             genre: [],
             language: []
         };
 
+        // --- EDIT LOGIC ---
+        function editMovie(movieId) {
+            // Find the movie object from our global list
+            const movie = allMovies.find(m => m.movie_id === movieId);
+            
+            if (!movie) {
+                console.error("Movie not found for editing");
+                return;
+            }
+
+            // 1. Scroll to form
+            document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
+
+            // 2. Change Form to Edit Mode
+            document.getElementById('formTitle').innerText = "Edit Movie: " + movie.title;
+            document.getElementById('submitBtn').innerText = "Update Movie";
+            document.getElementById('cancelEdit').style.display = "inline-block";
+            // Change action to the edit route
+            document.getElementById('movieForm').action = "/edit_movie/" + movie.movie_id;
+
+            // 3. Populate Standard Inputs
+            document.getElementById('title').value = movie.title;
+            document.getElementById('duration').value = movie.duration;
+            document.getElementById('image').value = movie.image;
+            document.getElementById('trailer').value = movie.trailer || '';
+            document.getElementById('price').value = movie.price;
+            document.getElementById('rating').value = movie.rating;
+            document.getElementById('theater').value = movie.theater;
+            document.getElementById('address').value = movie.address;
+            document.getElementById('description').value = movie.description;
+
+            // 4. Populate Custom Dropdowns
+            // Clear current selections first
+            resetDropdowns();
+            
+            // Set new values
+            setDropdownValue('genre', movie.genre);
+            setDropdownValue('language', movie.language);
+        }
+
+        function resetForm() {
+            // Reset to Add Mode
+            document.getElementById('movieForm').reset();
+            document.getElementById('movieForm').action = "/add_movie";
+            document.getElementById('formTitle').innerText = "Add New Movie";
+            document.getElementById('submitBtn').innerText = "Add Movie";
+            document.getElementById('cancelEdit').style.display = "none";
+            
+            resetDropdowns();
+        }
+
+        function resetDropdowns() {
+            selectionState = { genre: [], language: [] };
+            document.querySelectorAll('.option-item').forEach(el => el.classList.remove('selected'));
+            updateDisplay('genre');
+            updateDisplay('language');
+        }
+
+        function setDropdownValue(type, valueString) {
+            if (!valueString) return;
+            // Convert comma-separated string to array
+            const values = valueString.split(', ');
+            
+            values.forEach(val => {
+                selectionState[type].push(val);
+                // Highlight matching options in UI
+                const options = document.querySelectorAll(`#${type}_dropdown .option-item`);
+                options.forEach(opt => {
+                    if (opt.getAttribute('data-value') === val) {
+                        opt.classList.add('selected');
+                    }
+                });
+            });
+            updateDisplay(type);
+        }
+
+        // --- DROPDOWN INTERACTION ---
         function toggleDropdown(type) {
             const dropdown = document.querySelector(`#${type}_dropdown .dropdown-options`);
             const trigger = document.querySelector(`#${type}_dropdown .dropdown-trigger`);
