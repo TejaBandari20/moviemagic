@@ -1,4 +1,5 @@
 :root {
+    /* --- DEFAULT DARK THEME VARIABLES --- */
     --primary: #e50914; /* Netflix Red */
     --dark-bg: #0b0c15; /* Deep Cinematic Blue/Black */
     --card-bg: #151f30;
@@ -7,6 +8,19 @@
     --glass: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --input-bg: rgba(0,0,0,0.3); /* Transparent dark for inputs */
+}
+
+/* --- LIGHT THEME OVERRIDES --- */
+[data-theme="light"] {
+    --dark-bg: #f4f7f6;       /* Light Gray Background */
+    --card-bg: #ffffff;       /* White Cards */
+    --text-white: #1a1a1a;    /* Dark Text */
+    --text-gray: #555555;     /* Medium Gray Text */
+    --glass: rgba(0, 0, 0, 0.03);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    --input-bg: #e9ecef;      /* Light Gray Inputs */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
@@ -17,6 +31,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    transition: background-color 0.3s, color 0.3s; /* Smooth Theme Switch */
 }
 
 a { text-decoration: none; color: inherit; transition: 0.3s; }
@@ -28,12 +43,13 @@ ul { list-style: none; }
     justify-content: space-between;
     align-items: center;
     padding: 20px 5%;
-    background: rgba(11, 12, 21, 0.8);
+    background: var(--card-bg); /* Adapts to theme */
     backdrop-filter: blur(10px);
     position: sticky;
     top: 0;
     z-index: 100;
     border-bottom: 1px solid var(--glass-border);
+    transition: background 0.3s;
 }
 
 .logo {
@@ -47,23 +63,24 @@ ul { list-style: none; }
 .user-menu { display: flex; align-items: center; gap: 20px; font-size: 0.9rem; }
 
 .btn-outline {
-    border: 1px solid rgba(255,255,255,0.3);
+    border: 1px solid var(--text-gray); /* Adapted */
     padding: 8px 20px;
     border-radius: 50px;
+    color: var(--text-white);
 }
 .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 
-/* --- 2. AUTH PAGES (Signup - Old Style kept for compatibility) --- */
+/* --- 2. AUTH PAGES --- */
 .auth-container {
     height: 90vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: radial-gradient(circle at center, #1a2236 0%, #0b0c15 100%);
+    background: var(--dark-bg); /* Adapted */
 }
 
 .glass-card {
-    background: var(--glass);
+    background: var(--card-bg);
     backdrop-filter: blur(15px);
     border: 1px solid var(--glass-border);
     padding: 50px;
@@ -79,11 +96,12 @@ ul { list-style: none; }
     width: 100%;
     padding: 15px;
     margin: 10px 0;
-    background: rgba(0,0,0,0.3);
+    background: var(--input-bg); /* Adapted */
     border: 1px solid transparent;
     border-radius: 8px;
-    color: white;
+    color: var(--text-white);
     outline: none;
+    transition: border-color 0.3s;
 }
 .form-group input:focus { border-color: var(--primary); }
 
@@ -106,7 +124,7 @@ ul { list-style: none; }
     box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4);
 }
 
-/* --- 3. LANDING PAGE FIX (HERO) --- */
+/* --- 3. LANDING PAGE HERO --- */
 .hero {
     height: 100vh;
     display: flex;
@@ -140,6 +158,7 @@ ul { list-style: none; }
     margin-bottom: 30px;
     position: relative;
     padding-left: 20px;
+    color: var(--text-white);
 }
 .section-title::before {
     content: ''; position: absolute; left: 0; top: 5px; height: 80%; width: 5px; background: var(--primary); border-radius: 2px;
@@ -160,14 +179,15 @@ ul { list-style: none; }
     transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     cursor: pointer;
+    box-shadow: var(--shadow);
 }
 
-.movie-card:hover { transform: translateY(-10px) scale(1.02); z-index: 10; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+.movie-card:hover { transform: translateY(-10px) scale(1.02); z-index: 10; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
 
 .movie-poster { width: 100%; height: 350px; object-fit: cover; }
 
 .movie-info { padding: 20px; }
-.movie-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; }
+.movie-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; color: var(--text-white); }
 .movie-genre { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 15px; }
 
 /* --- 5. BOOKING PAGE --- */
@@ -211,6 +231,9 @@ ul { list-style: none; }
     font-size: 0.7rem;
     color: rgba(255,255,255,0.4);
 }
+/* Seat color fix for Light Mode */
+[data-theme="light"] .seat { background: #cbd5e1; color: #333; }
+
 .seat:hover:not(.occupied) { background: #4a6fa5; color: white; transform: scale(1.2); }
 .seat.selected { background: var(--primary); color: white; box-shadow: 0 0 10px var(--primary); }
 .seat.occupied { background: #1a1a1a; cursor: not-allowed; }
@@ -219,9 +242,10 @@ ul { list-style: none; }
     background: var(--card-bg);
     padding: 30px;
     border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid var(--glass-border);
     position: sticky;
     top: 100px;
+    box-shadow: var(--shadow);
 }
 
 /* --- 6. TICKET STUB --- */
@@ -235,7 +259,7 @@ ul { list-style: none; }
 
 .ticket {
     display: flex;
-    background: white;
+    background: white; /* Always white */
     color: black;
     width: 700px;
     border-radius: 20px;
@@ -287,7 +311,7 @@ ul { list-style: none; }
 }
 
 .history-card {
-    background: rgba(255,255,255,0.05);
+    background: var(--card-bg); /* Adapted */
     padding: 25px;
     border-radius: 10px;
     display: flex;
@@ -295,10 +319,11 @@ ul { list-style: none; }
     align-items: center;
     transition: 0.3s;
     border-left: 4px solid transparent;
+    border: 1px solid var(--glass-border);
 }
 
 .history-card:hover {
-    background: rgba(255,255,255,0.1);
+    background: var(--glass);
     border-left: 4px solid var(--primary);
     transform: translateX(10px);
 }
@@ -310,12 +335,12 @@ ul { list-style: none; }
 }
 
 .tag {
-    background: rgba(0,0,0,0.3);
+    background: var(--input-bg);
     padding: 5px 15px;
     border-radius: 50px;
     font-size: 0.8rem;
-    color: #ccc;
-    border: 1px solid #333;
+    color: var(--text-gray);
+    border: 1px solid var(--glass-border);
 }
 
 .tag.price {
@@ -335,7 +360,7 @@ ul { list-style: none; }
 }
 
 .section-heading {
-    color: white;
+    color: var(--text-white);
     margin-bottom: 20px;
     font-size: 1.1rem;
     border-bottom: 1px solid #333;
@@ -351,7 +376,7 @@ ul { list-style: none; }
 /* Form inputs inside profile */
 .form-group label {
     display: block;
-    color: #aaa;
+    color: var(--text-gray);
     font-size: 0.85rem;
     margin-bottom: 8px;
 }
@@ -361,10 +386,10 @@ ul { list-style: none; }
 .form-group input[type="date"] {
     width: 100%;
     padding: 12px;
-    background: #0b0c15;
-    border: 1px solid #333;
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border);
     border-radius: 6px;
-    color: white;
+    color: var(--text-white);
     outline: none;
     transition: border-color 0.3s;
 }
@@ -373,7 +398,7 @@ ul { list-style: none; }
     border-color: var(--primary);
 }
 
-/* Custom Radio Toggles (Identity/Married) */
+/* Custom Radio Toggles (Identity/Married/Theme) */
 .toggle-group {
     display: flex;
     gap: 15px;
@@ -383,11 +408,11 @@ ul { list-style: none; }
     flex: 1;
     text-align: center;
     padding: 10px;
-    background: #0b0c15;
-    border: 1px solid #333;
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border);
     border-radius: 6px;
     cursor: pointer;
-    color: #aaa;
+    color: var(--text-gray);
     font-size: 0.9rem;
     transition: 0.3s;
 }
@@ -519,6 +544,18 @@ input[type="radio"]:checked + .toggle-label {
 .divider::before { left: 0; }
 .divider::after { right: 0; }
 
+.mobile-input-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 30px;
+}
+
+.mobile-input-container span { margin: 0 10px; font-weight: 500; color: #333; }
+.mobile-field { border: none; outline: none; width: 100%; font-size: 1rem; }
+
 .terms { font-size: 0.7rem; color: #777; }
 .terms a { color: #e50914; text-decoration: none; }
 
@@ -547,6 +584,17 @@ input[type="radio"]:checked + .toggle-label {
 .glass-card label {
     display: block;
     margin-bottom: 5px;
-    color: #aaa;
+    color: var(--text-gray); /* Adapted */
     font-size: 0.9rem;
+}
+textarea {
+    width: 100%;
+    padding: 15px;
+    background: var(--input-bg); /* Adapted */
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-white);
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
 }

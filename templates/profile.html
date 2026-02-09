@@ -6,7 +6,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<!-- APPLY THEME TO BODY IMMEDIATELY -->
+<body data-theme="{{ user.get('theme', 'dark') }}">
     <nav class="navbar">
         <div class="logo">MOVIEMAGIC</div>
         <a href="/dashboard" class="btn-outline">Back to Dashboard</a>
@@ -19,7 +20,7 @@
             <div class="avatar-circle">{{ user['name'][0] | upper }}</div>
             <div>
                 <h2 style="margin-bottom: 5px;">{{ user['name'] }}</h2>
-                <p style="color: #aaa;">{{ user['email'] }}</p>
+                <p style="color: var(--text-gray);">{{ user['email'] }}</p>
             </div>
             <!-- Logout Button -->
             <div style="margin-left: auto;">
@@ -62,6 +63,18 @@
                         <input type="date" name="birthday" value="{{ user.get('birthday', '') }}">
                     </div>
 
+                    <!-- THEME SELECTION (Dark/Light) -->
+                    <div class="form-group">
+                        <label>App Theme</label>
+                        <div class="toggle-group">
+                            <input type="radio" name="theme" id="theme_dark" value="dark" {% if user.get('theme', 'dark') == 'dark' %}checked{% endif %}>
+                            <label for="theme_dark" class="toggle-label">Dark Mode 🌙</label>
+                            
+                            <input type="radio" name="theme" id="theme_light" value="light" {% if user.get('theme') == 'light' %}checked{% endif %}>
+                            <label for="theme_light" class="toggle-label">Light Mode ☀️</label>
+                        </div>
+                    </div>
+
                     <!-- Radio Buttons for Identity (Gender) -->
                     <div class="form-group">
                         <label>Identity (Optional)</label>
@@ -98,9 +111,9 @@
                 {% for booking in bookings %}
                 <div class="history-card">
                     <div class="history-left">
-                        <h4 style="color: #e50914; margin-bottom: 5px; font-size: 1.2rem;">{{ booking.movie_name }}</h4>
-                        <p style="font-size: 0.9rem; color: #ccc;">{{ booking.theater }}</p>
-                        <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">ID: {{ booking.booking_id }}</p>
+                        <h4 style="color: var(--primary); margin-bottom: 5px; font-size: 1.2rem;">{{ booking.movie_name }}</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-gray);">{{ booking.theater }}</p>
+                        <p style="font-size: 0.8rem; color: var(--text-gray); margin-top: 5px;">ID: {{ booking.booking_id }}</p>
                     </div>
                     <div class="history-right">
                         <div class="tag">{{ booking.date }}</div>
@@ -110,7 +123,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div style="text-align: center; color: #555; margin-top: 50px;">
+                <div style="text-align: center; color: var(--text-gray); margin-top: 50px;">
                     <p>No bookings found yet.</p>
                     <a href="/dashboard" class="btn-primary" style="margin-top: 20px; display: inline-block;">Book a Movie</a>
                 </div>

@@ -23,7 +23,6 @@ bookings_table = dynamodb.Table('MovieMagic_Bookings')
 movies_table = dynamodb.Table('MovieMagic_Movies')
 
 # --- HELPER: Convert DynamoDB Decimals to Integers/Floats ---
-# This is REQUIRED for the Edit button to work in the Admin Portal
 def replace_decimals(obj):
     if isinstance(obj, list):
         return [replace_decimals(i) for i in obj]
@@ -64,7 +63,14 @@ def signup():
             if 'Item' in users_table.get_item(Key={'email': email}):
                 flash('Email already registered', 'danger')
                 return redirect(url_for('signup'))
-            users_table.put_item(Item={'id': str(uuid.uuid4()), 'name': name, 'email': email, 'password': password})
+            # Default theme is 'dark'
+            users_table.put_item(Item={
+                'id': str(uuid.uuid4()), 
+                'name': name, 
+                'email': email, 
+                'password': password, 
+                'theme': 'dark'
+            })
             flash('Account created! Please login.', 'success')
             return redirect(url_for('login'))
         except ClientError:
@@ -79,7 +85,7 @@ def login():
         
         # Admin Login Check
         if email == "admin@moviemagic.com" and password == "admin123":
-            session['user'] = {'name': 'Administrator', 'email': email, 'is_admin': True}
+            session['user'] = {'name': 'Administrator', 'email': email, 'is_admin': True, 'theme': 'dark'}
             return redirect(url_for('admin_dashboard'))
 
         try:
@@ -87,7 +93,11 @@ def login():
             if 'Item' in response:
                 user = response['Item']
                 if check_password_hash(user['password'], password):
-                    session['user'] = {'name': user['name'], 'email': user['email']}
+                    session['user'] = {
+                        'name': user['name'], 
+                        'email': user['email'],
+                        'theme': user.get('theme', 'dark') # Load User Theme
+                    }
                     return redirect(url_for('dashboard'))
             flash('Invalid credentials', 'danger')
         except ClientError:
@@ -106,7 +116,6 @@ def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
     try:
         response = movies_table.scan()
-        # Clean data before sending to template
         movies = replace_decimals(response.get('Items', [])) 
     except ClientError as e:
         movies = []
@@ -183,7 +192,14 @@ def profile():
     user_info = {}
     try:
         user_response = users_table.get_item(Key={'email': user_email})
-        user_info = user_response.get('Item', session['user'])
+        if 'Item' in user_response:
+            user_info = user_response['Item']
+            # Ensure theme key exists for template
+            if 'theme' not in user_info:
+                user_info['theme'] = 'dark'
+        else:
+            user_info = session['user']
+
         response = bookings_table.scan(FilterExpression=Attr('booked_by').eq(user_email))
         user_bookings = replace_decimals(response.get('Items', []))
     except ClientError:
@@ -201,22 +217,28 @@ def update_profile():
         'mobile': request.form.get('mobile', ''),
         'birthday': request.form.get('birthday', ''),
         'gender': request.form.get('gender', ''),
-        'married': request.form.get('married', '')
+        'married': request.form.get('married', ''),
+        'theme': request.form.get('theme', 'dark') # Get Theme Choice
     }
     fields['name'] = f"{fields['first_name']} {fields['last_name']}".strip() or session['user']['name']
 
     try:
+        # Update DynamoDB including 'theme'
         users_table.update_item(
             Key={'email': email},
-            UpdateExpression="set #n=:n, first_name=:fn, last_name=:ln, mobile=:m, birthday=:b, gender=:g, married=:ma",
+            UpdateExpression="set #n=:n, first_name=:fn, last_name=:ln, mobile=:m, birthday=:b, gender=:g, married=:ma, theme=:t",
             ExpressionAttributeNames={'#n': 'name'},
             ExpressionAttributeValues={
                 ':n': fields['name'], ':fn': fields['first_name'], ':ln': fields['last_name'],
-                ':m': fields['mobile'], ':b': fields['birthday'], ':g': fields['gender'], ':ma': fields['married']
+                ':m': fields['mobile'], ':b': fields['birthday'], ':g': fields['gender'], 
+                ':ma': fields['married'], ':t': fields['theme']
             }
         )
+        # Update Session Data immediately
         session['user']['name'] = fields['name']
+        session['user']['theme'] = fields['theme']
         session.modified = True
+        
         flash('Profile updated successfully!', 'success')
     except ClientError:
         flash('Error updating profile', 'danger')
@@ -274,7 +296,6 @@ def edit_movie(movie_id):
         rating = request.form['rating']
         if not rating: rating = 0
 
-        # FIX: Added alias #d for 'duration' as it is also a reserved keyword
         movies_table.update_item(
             Key={'movie_id': movie_id},
             UpdateExpression="set title=:t, genre=:g, #l=:l, #d=:d, image=:i, trailer=:tr, price=:p, rating=:r, theater=:th, address=:a, description=:desc",
