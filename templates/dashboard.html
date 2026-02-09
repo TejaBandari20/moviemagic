@@ -24,7 +24,6 @@
         <h2 class="section-title">Now Showing</h2>
         <div class="movie-grid">
             {% for movie in movies %}
-            <!-- FIX: Changed div to 'a' tag. Removes 'onclick' error and improves navigation. -->
             <a href="{{ url_for('movie_details', movie_id=movie.movie_id) }}" class="movie-card" style="text-decoration: none; color: inherit; display: block;">
                 
                 <!-- SMART IMAGE LOGIC -->
@@ -38,9 +37,12 @@
                     <div class="movie-title">{{ movie.title }}</div>
                     <div class="movie-genre">{{ movie.genre }}</div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: var(--primary); font-weight: bold;">{{ movie.language }}</span>
-                        <!-- Changed to span since the whole card is now a link -->
-                        <span class="btn-outline" style="padding: 8px 15px; font-size: 0.8rem;">View Info</span>
+                        <!-- UPDATED: Fixed size, truncation, and tooltip -->
+                        <span style="color: var(--primary); font-weight: bold; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;" title="{{ movie.language }}">
+                            {{ movie.language }}
+                        </span>
+                        
+                        <span class="btn-outline" style="padding: 6px 12px; font-size: 0.75rem; white-space: nowrap;">View Info</span>
                     </div>
                 </div>
             </a>
