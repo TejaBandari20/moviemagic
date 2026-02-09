@@ -23,6 +23,7 @@ bookings_table = dynamodb.Table('MovieMagic_Bookings')
 movies_table = dynamodb.Table('MovieMagic_Movies')
 
 # --- HELPER: Convert DynamoDB Decimals to Integers/Floats ---
+# This is REQUIRED for the Edit button to work in the Admin Portal
 def replace_decimals(obj):
     if isinstance(obj, list):
         return [replace_decimals(i) for i in obj]
@@ -76,6 +77,7 @@ def login():
         email = request.form['email']
         password = request.form['password']
         
+        # Admin Login Check
         if email == "admin@moviemagic.com" and password == "admin123":
             session['user'] = {'name': 'Administrator', 'email': email, 'is_admin': True}
             return redirect(url_for('admin_dashboard'))
@@ -104,6 +106,7 @@ def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
     try:
         response = movies_table.scan()
+        # Clean data before sending to template
         movies = replace_decimals(response.get('Items', [])) 
     except ClientError as e:
         movies = []
@@ -271,12 +274,13 @@ def edit_movie(movie_id):
         rating = request.form['rating']
         if not rating: rating = 0
 
-        # FIX: Using #l alias for 'language' because it's a reserved keyword in DynamoDB
+        # FIX: Added alias #d for 'duration' as it is also a reserved keyword
         movies_table.update_item(
             Key={'movie_id': movie_id},
-            UpdateExpression="set title=:t, genre=:g, #l=:l, duration=:d, image=:i, trailer=:tr, price=:p, rating=:r, theater=:th, address=:a, description=:desc",
+            UpdateExpression="set title=:t, genre=:g, #l=:l, #d=:d, image=:i, trailer=:tr, price=:p, rating=:r, theater=:th, address=:a, description=:desc",
             ExpressionAttributeNames={
-                '#l': 'language'  # Alias defined here
+                '#l': 'language',
+                '#d': 'duration'
             },
             ExpressionAttributeValues={
                 ':t': request.form['title'],
