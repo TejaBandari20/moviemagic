@@ -71,12 +71,14 @@
             background: #151f30;
             padding: 20px;
             border-radius: 15px;
+            margin-bottom: 50px;
         }
         .trailer-frame {
             width: 100%;
             height: 450px;
             border-radius: 10px;
             border: none;
+            background-color: #000;
         }
         @media (max-width: 768px) {
             .movie-content { flex-direction: column; margin-top: -100px; align-items: center; text-align: center; }
@@ -139,14 +141,39 @@
     <div class="container">
         <h3 class="section-title">Official Trailer</h3>
         <div class="trailer-container">
-            <!-- Convert standard YouTube link to Embed link automatically -->
+            <!-- Iframe source is set by JavaScript below -->
             <iframe class="trailer-frame" 
-                    src="{{ movie.trailer.replace('watch?v=', 'embed/') }}" 
+                    id="trailer-video"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen>
             </iframe>
         </div>
     </div>
+
+    <!-- Smart Script to Fix YouTube Links -->
+    <script>
+        (function() {
+            const rawUrl = "{{ movie.trailer }}";
+            const iframe = document.getElementById('trailer-video');
+            
+            if (rawUrl) {
+                // Regex to find the Video ID from any YouTube URL format (watch?v=, youtu.be/, embed/)
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                const match = rawUrl.match(regExp);
+
+                if (match && match[2].length === 11) {
+                    // Valid ID found, construct the embed URL
+                    iframe.src = 'https://www.youtube.com/embed/' + match[2];
+                } else {
+                    // Fallback if regex fails (though rare)
+                    iframe.src = rawUrl;
+                }
+            } else {
+                // Hide container if no trailer
+                document.querySelector('.trailer-container').style.display = 'none';
+            }
+        })();
+    </script>
     {% endif %}
 
 </body>
