@@ -55,24 +55,29 @@
             flex-wrap: wrap;
         }
         .meta-tag {
-            background: var(--input-bg);
+            /* FIX: Dark semi-transparent background for readability in all modes */
+            background: rgba(0, 0, 0, 0.6);
             padding: 5px 15px;
             border-radius: 5px;
             font-size: 0.9rem;
-            border: 1px solid var(--glass-border);
-            /* Force white text for visibility on banner */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* Force white text */
             color: #ffffff;
+            backdrop-filter: blur(5px);
         }
         .synopsis {
             font-size: 1.1rem;
             line-height: 1.6;
-            color: var(--text-gray);
+            /* FIX: Light text for contrast against dark box */
+            color: #e0e0e0;
             margin-bottom: 30px;
             max-width: 800px;
-            /* Added background to ensure readability if it overlaps complex images */
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
+            /* FIX: Darker background to ensure text pops against banner or white body */
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
             border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .trailer-container {
             margin-top: 40px;
