@@ -8,9 +8,10 @@
     <!-- Library for downloading images -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
-<body>
+<!-- UPDATED: Added data-theme for Light/Dark mode support -->
+<body data-theme="{{ session.get('user', {}).get('theme', 'dark') }}">
     <div class="ticket-container">
-        <h2 style="margin-bottom: 20px;">Booking Confirmed!</h2>
+        <h2 style="margin-bottom: 20px; color: var(--text-white);">Booking Confirmed!</h2>
         
         <!-- Ticket Capture Area -->
         <div class="ticket" id="ticket-capture">
@@ -26,7 +27,7 @@
                     <div><span style="color: #aaa; font-size: 0.7rem;">PAID</span><br><b>₹{{ booking.amount_paid }}</b></div>
                 </div>
                 
-                <!-- BARCODE SECTION ADDED HERE -->
+                <!-- BARCODE SECTION -->
                 <div style="border-top: 2px dashed #ddd; padding-top: 20px; text-align: center; margin-top: 20px;">
                     <img src="https://bwipjs-api.metafloor.com/?bcid=code128&text={{ booking.booking_id }}&scale=2&height=8&includetext" 
                          alt="Barcode" 

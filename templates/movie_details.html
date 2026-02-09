@@ -6,89 +6,115 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* Specific Styles for Movie Details Page */
-        .movie-banner {
-            position: relative;
-            height: 400px;
-            overflow: hidden;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        /* Styles specific to this page */
+        .movie-banner { 
+            position: relative; 
+            height: 400px; 
+            overflow: hidden; 
+            border-bottom: 1px solid var(--glass-border); 
         }
-        .banner-bg {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: blur(20px) brightness(0.4);
-            transform: scale(1.1);
+        
+        .banner-bg { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            filter: blur(20px) brightness(0.4); 
+            transform: scale(1.1); 
         }
-        .movie-content {
-            max-width: 1200px;
-            margin: -200px auto 0;
-            padding: 20px;
-            position: relative;
-            display: flex;
-            gap: 40px;
-            align-items: flex-start;
+        
+        .movie-content { 
+            max-width: 1200px; 
+            margin: -200px auto 0; 
+            padding: 20px; 
+            position: relative; 
+            display: flex; 
+            gap: 40px; 
+            align-items: flex-start; 
         }
-        .poster-large {
-            width: 300px;
-            border-radius: 15px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.2);
+        
+        .poster-large { 
+            width: 300px; 
+            border-radius: 15px; 
+            box-shadow: var(--shadow); 
+            border: 1px solid var(--glass-border); 
         }
-        .details-right {
-            flex: 1;
-            padding-top: 50px;
+        
+        .details-right { 
+            flex: 1; 
+            padding-top: 50px; 
         }
-        .movie-title-large {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        
+        .movie-title-large { 
+            font-size: 3.5rem; 
+            font-weight: 800; 
+            margin-bottom: 10px; 
+            text-transform: uppercase; 
+            text-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+            color: var(--text-white); 
         }
-        .meta-tags {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
+        
+        .meta-tags { 
+            display: flex; 
+            gap: 15px; 
+            margin-bottom: 25px; 
+            flex-wrap: wrap; 
         }
-        .meta-tag {
-            background: rgba(255,255,255,0.1);
-            padding: 5px 15px;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            border: 1px solid rgba(255,255,255,0.2);
+        
+        .meta-tag { 
+            background: var(--input-bg); 
+            padding: 5px 15px; 
+            border-radius: 5px; 
+            font-size: 0.9rem; 
+            border: 1px solid var(--glass-border); 
+            color: var(--text-white); 
         }
-        .synopsis {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #ddd;
-            margin-bottom: 30px;
-            max-width: 800px;
+        
+        .synopsis { 
+            font-size: 1.1rem; 
+            line-height: 1.6; 
+            color: var(--text-gray); 
+            margin-bottom: 30px; 
+            max-width: 800px; 
         }
-        .trailer-container {
-            margin-top: 40px;
-            background: #151f30;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 50px;
+        
+        .trailer-container { 
+            margin-top: 40px; 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 15px; 
+            margin-bottom: 50px; 
+            border: 1px solid var(--glass-border); 
         }
-        .trailer-frame {
-            width: 100%;
-            height: 450px;
-            border-radius: 10px;
-            border: none;
-            background-color: #000;
+        
+        .trailer-frame { 
+            width: 100%; 
+            height: 450px; 
+            border-radius: 10px; 
+            border: none; 
+            background-color: #000; 
         }
+        
         @media (max-width: 768px) {
-            .movie-content { flex-direction: column; margin-top: -100px; align-items: center; text-align: center; }
-            .details-right { padding-top: 20px; }
-            .meta-tags { justify-content: center; }
-            .trailer-frame { height: 250px; }
+            .movie-content { 
+                flex-direction: column; 
+                margin-top: -100px; 
+                align-items: center; 
+                text-align: center; 
+            }
+            .details-right { 
+                padding-top: 20px; 
+            }
+            .meta-tags { 
+                justify-content: center; 
+            }
+            .trailer-frame { 
+                height: 250px; 
+            }
         }
     </style>
 </head>
-<body>
+<!-- UPDATED BODY TAG FOR THEME -->
+<body data-theme="{{ session.get('user', {}).get('theme', 'dark') }}">
     <nav class="navbar">
         <div class="logo">MOVIEMAGIC</div>
         <div class="user-menu">
@@ -96,7 +122,6 @@
         </div>
     </nav>
 
-    <!-- Background Blur Effect -->
     <div class="movie-banner">
         {% if movie.image.startswith('http') %}
             <img src="{{ movie.image }}" class="banner-bg">
@@ -105,21 +130,18 @@
         {% endif %}
     </div>
 
-    <!-- Main Content -->
     <div class="movie-content">
-        <!-- Poster -->
         {% if movie.image.startswith('http') %}
             <img src="{{ movie.image }}" class="poster-large">
         {% else %}
             <img src="{{ url_for('static', filename='images/' + movie.image) }}" class="poster-large">
         {% endif %}
 
-        <!-- Info -->
         <div class="details-right">
             <h1 class="movie-title-large">{{ movie.title }}</h1>
             
             <div class="meta-tags">
-                <div class="meta-tag" style="background: #e50914; border: none; font-weight: bold;">{{ movie.rating }} / 10</div>
+                <div class="meta-tag" style="background: #e50914; border: none; font-weight: bold; color: white;">{{ movie.rating }} / 10</div>
                 <div class="meta-tag">{{ movie.language }}</div>
                 <div class="meta-tag">{{ movie.duration }}</div>
                 <div class="meta-tag">{{ movie.genre }}</div>
