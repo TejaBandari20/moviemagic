@@ -37,7 +37,7 @@ def send_email(booking):
         print(f"SNS Error: {e}")
         return False
 
-# --- AUTH ROUTES ---
+# --- ROUTES ---
 
 @app.route('/')
 def index():
@@ -140,8 +140,6 @@ def confirm_booking():
     
     try:
         booking_id = f"MM-{datetime.now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8]}"
-        
-        # Generate a fake payment ID for simulation
         fake_payment_id = f"PAY-{str(uuid.uuid4())[:12].upper()}"
 
         booking_item = {
@@ -169,7 +167,7 @@ def confirm_booking():
         flash('Booking failed.', 'danger')
         return redirect(url_for('dashboard'))
 
-# --- USER PROFILE (With Extra Fields) ---
+# --- USER PROFILE ---
 
 @app.route('/profile')
 def profile():
@@ -180,14 +178,12 @@ def profile():
     user_info = {}
 
     try:
-        # Fetch latest user details (Mobile, Gender, etc.)
         user_response = users_table.get_item(Key={'email': user_email})
         if 'Item' in user_response:
             user_info = user_response['Item']
         else:
             user_info = session['user']
 
-        # Fetch booking history
         response = bookings_table.scan(FilterExpression=Attr('booked_by').eq(user_email))
         user_bookings = response.get('Items', [])
     except ClientError as e:
@@ -200,8 +196,6 @@ def update_profile():
     if 'user' not in session: return redirect(url_for('login'))
 
     email = session['user']['email']
-    
-    # Safe data retrieval using .get(key, '') to avoid NoneType errors
     fields = {
         'first_name': request.form.get('first_name', ''),
         'last_name': request.form.get('last_name', ''),
@@ -211,23 +205,16 @@ def update_profile():
         'married': request.form.get('married', '')
     }
     
-    # Create display name
     fields['name'] = f"{fields['first_name']} {fields['last_name']}".strip()
     if not fields['name']:
-        fields['name'] = session['user']['name'] # Fallback if empty
+        fields['name'] = session['user']['name']
 
     try:
-        # Dynamic Update
         update_expr = "set #n=:n, first_name=:fn, last_name=:ln, mobile=:m, birthday=:b, gender=:g, married=:ma"
         expr_names = {'#n': 'name'}
         expr_values = {
-            ':n': fields['name'], 
-            ':fn': fields['first_name'], 
-            ':ln': fields['last_name'],
-            ':m': fields['mobile'], 
-            ':b': fields['birthday'], 
-            ':g': fields['gender'], 
-            ':ma': fields['married']
+            ':n': fields['name'], ':fn': fields['first_name'], ':ln': fields['last_name'],
+            ':m': fields['mobile'], ':b': fields['birthday'], ':g': fields['gender'], ':ma': fields['married']
         }
 
         users_table.update_item(
@@ -236,11 +223,8 @@ def update_profile():
             ExpressionAttributeNames=expr_names,
             ExpressionAttributeValues=expr_values
         )
-        
-        # Update Session
         session['user']['name'] = fields['name']
         session.modified = True
-        
         flash('Profile updated successfully!', 'success')
     except ClientError as e:
         print(e)
@@ -290,6 +274,51 @@ def add_movie():
         flash('Error adding movie', 'danger')
         
     return redirect(url_for('admin_dashboard'))
+
+# --- EDIT MOVIE ROUTE (NEW) ---
+@app.route('/edit_movie/<movie_id>', methods=['GET', 'POST'])
+def edit_movie(movie_id):
+    if 'user' not in session or not session.get('user', {}).get('is_admin'):
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        try:
+            # Update DynamoDB with all fields
+            movies_table.update_item(
+                Key={'movie_id': movie_id},
+                UpdateExpression="set title=:t, genre=:g, language=:l, duration=:d, image=:i, trailer=:tr, price=:p, rating=:r, theater=:th, address=:a, description=:desc",
+                ExpressionAttributeValues={
+                    ':t': request.form['title'],
+                    ':g': request.form['genre'],
+                    ':l': request.form['language'],
+                    ':d': request.form['duration'],
+                    ':i': request.form['image'],
+                    ':tr': request.form['trailer'],
+                    ':p': request.form['price'],
+                    ':r': request.form['rating'],
+                    ':th': request.form['theater'],
+                    ':a': request.form['address'],
+                    ':desc': request.form['description']
+                }
+            )
+            flash('Movie updated successfully!', 'success')
+            return redirect(url_for('admin_dashboard'))
+        except ClientError as e:
+            print(e)
+            flash('Error updating movie', 'danger')
+            return redirect(url_for('admin_dashboard'))
+    
+    # GET Request: Fetch movie details to pre-fill the form
+    try:
+        response = movies_table.get_item(Key={'movie_id': movie_id})
+        movie = response.get('Item')
+        if not movie:
+            flash('Movie not found', 'danger')
+            return redirect(url_for('admin_dashboard'))
+        return render_template('edit_movie.html', movie=movie)
+    except ClientError:
+        flash('Error loading movie', 'danger')
+        return redirect(url_for('admin_dashboard'))
 
 @app.route('/delete_movie/<movie_id>')
 def delete_movie(movie_id):
