@@ -23,7 +23,6 @@ bookings_table = dynamodb.Table('MovieMagic_Bookings')
 movies_table = dynamodb.Table('MovieMagic_Movies')
 
 # --- HELPER: Convert DynamoDB Decimals to Integers/Floats ---
-# This is REQUIRED for the Edit button to work in the Admin Portal
 def replace_decimals(obj):
     if isinstance(obj, list):
         return [replace_decimals(i) for i in obj]
@@ -77,7 +76,6 @@ def login():
         email = request.form['email']
         password = request.form['password']
         
-        # Admin Login Check
         if email == "admin@moviemagic.com" and password == "admin123":
             session['user'] = {'name': 'Administrator', 'email': email, 'is_admin': True}
             return redirect(url_for('admin_dashboard'))
@@ -106,7 +104,6 @@ def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
     try:
         response = movies_table.scan()
-        # Clean data before sending to template
         movies = replace_decimals(response.get('Items', [])) 
     except ClientError as e:
         movies = []
@@ -230,7 +227,6 @@ def admin_dashboard():
         return redirect(url_for('login'))
     try:
         response = movies_table.scan()
-        # Clean data here too so the Edit button JSON works
         movies = replace_decimals(response.get('Items', []))
     except ClientError:
         movies = []
@@ -240,6 +236,11 @@ def admin_dashboard():
 def add_movie():
     if 'user' not in session or not session.get('user', {}).get('is_admin'): return redirect(url_for('login'))
     try:
+        price = request.form['price']
+        if not price: price = 0
+        rating = request.form['rating']
+        if not rating: rating = 0
+
         movie_item = {
             'movie_id': str(uuid.uuid4()),
             'title': request.form['title'],
@@ -248,9 +249,8 @@ def add_movie():
             'duration': request.form['duration'],
             'image': request.form['image'],
             'trailer': request.form['trailer'],
-            # Convert to Decimal for DB storage
-            'price': Decimal(request.form['price']),
-            'rating': Decimal(request.form['rating']),
+            'price': Decimal(str(price)),
+            'rating': Decimal(str(rating)),
             'theater': request.form['theater'],
             'address': request.form['address'],
             'description': request.form['description']
@@ -266,9 +266,18 @@ def add_movie():
 def edit_movie(movie_id):
     if 'user' not in session or not session.get('user', {}).get('is_admin'): return redirect(url_for('login'))
     try:
+        price = request.form['price']
+        if not price: price = 0
+        rating = request.form['rating']
+        if not rating: rating = 0
+
+        # FIX: Using #l alias for 'language' because it's a reserved keyword in DynamoDB
         movies_table.update_item(
             Key={'movie_id': movie_id},
-            UpdateExpression="set title=:t, genre=:g, language=:l, duration=:d, image=:i, trailer=:tr, price=:p, rating=:r, theater=:th, address=:a, description=:desc",
+            UpdateExpression="set title=:t, genre=:g, #l=:l, duration=:d, image=:i, trailer=:tr, price=:p, rating=:r, theater=:th, address=:a, description=:desc",
+            ExpressionAttributeNames={
+                '#l': 'language'  # Alias defined here
+            },
             ExpressionAttributeValues={
                 ':t': request.form['title'],
                 ':g': request.form['genre'],
@@ -276,8 +285,8 @@ def edit_movie(movie_id):
                 ':d': request.form['duration'],
                 ':i': request.form['image'],
                 ':tr': request.form['trailer'],
-                ':p': Decimal(request.form['price']),
-                ':r': Decimal(request.form['rating']),
+                ':p': Decimal(str(price)),
+                ':r': Decimal(str(rating)),
                 ':th': request.form['theater'],
                 ':a': request.form['address'],
                 ':desc': request.form['description']
